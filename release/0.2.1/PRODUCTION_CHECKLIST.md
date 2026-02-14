@@ -43,7 +43,7 @@ Fill: `release/0.2.1/A11Y_SIGNOFF.md`
 ## 5) Store Submission (manual)
 - [ ] Upload `artifacts/cocoon-v0.2.1.zip` to Chrome Web Store
 - [ ] Verify listing links work publicly (Privacy + Support)
-- [ ] Verify permissions list matches the justification text (`storage`, `tabs`, `alarms`, host permissions)
+- [ ] Verify permissions list matches the justification text (`storage`, `activeTab`, `alarms`, host permissions)
 - [ ] Submit for review
 
 ## 6) Post-Approval Smoke Test (manual; do immediately after publish)
