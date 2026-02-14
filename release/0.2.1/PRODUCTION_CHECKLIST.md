@@ -21,7 +21,7 @@ URL files (copy/paste for Chrome Web Store):
 - [ ] GitHub Pages is enabled and live for `docs/` (public URL works)
 - [ ] Privacy policy URL set to the public page (see `release/0.2.1/PRIVACY_POLICY_URL.txt`)
 - [ ] Support URL set to the public page (see `release/0.2.1/SUPPORT_URL.txt`)
-- [ ] Permission justifications written (especially `tabs` and `alarms`)
+- [ ] Permission justifications written (especially `activeTab` and `alarms`)
 - [ ] Screenshots captured (popup, options, grounding overlay, at least 1280x800 or as required by CWS)
 - [ ] Category, language, and single-purpose description match actual behavior
 

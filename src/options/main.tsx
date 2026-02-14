@@ -14,7 +14,6 @@ import {
   upsertScheduleRule,
   updateSiteFeedCleanerOverride
 } from "../lib/settings";
-import { broadcastSettings } from "../lib/messages";
 import type {
   AdaptiveScheduleRule,
   CocoonProfile,
@@ -59,7 +58,6 @@ function OptionsApp(): React.JSX.Element {
   const update = async (next: CocoonSettings): Promise<void> => {
     setSettings(next);
     await saveSettings(next);
-    await broadcastSettings(next);
     setSaved(true);
   };
 

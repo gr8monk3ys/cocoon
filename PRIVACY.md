@@ -35,7 +35,7 @@ This data remains local to your browser profile.
 Cocoon requests:
 
 - `storage`: to save your extension settings
-- `tabs`: to read active-tab URL metadata for current-site controls
+- `activeTab`: to read the active tab hostname when you open the popup (for current-site controls)
 - `alarms`: to auto-expire timed scenario quick-switches and restore baseline settings
 - host permissions for supported social domains only, so content scripts can apply selected controls
 

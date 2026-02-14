@@ -4,7 +4,7 @@
   "description": "Privacy-first browsing support for neurodivergent and mental health needs.",
   "version": "0.2.1",
   "homepage_url": "https://gr8monk3ys.github.io/cocoon/",
-  "permissions": ["storage", "tabs", "alarms"],
+  "permissions": ["storage", "activeTab", "alarms"],
   "host_permissions": [
     "https://*.x.com/*",
     "https://*.twitter.com/*",

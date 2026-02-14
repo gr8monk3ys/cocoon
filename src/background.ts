@@ -1,5 +1,4 @@
 import { getSettings, restoreExpiredScenario, saveSettings } from "./lib/settings";
-import { broadcastSettings } from "./lib/messages";
 import type { CocoonSettings } from "./lib/types";
 
 const SCENARIO_ALARM = "cocoon-scenario-expiry";
@@ -23,7 +22,6 @@ async function syncScenarioExpiry(): Promise<void> {
   }
 
   await saveSettings(restored);
-  await broadcastSettings(restored);
   scheduleScenarioAlarm(restored);
 }
 

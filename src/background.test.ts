@@ -49,10 +49,6 @@ function createChromeMock(initialSettings: CocoonSettings) {
           onStartup = cb;
         })
       }
-    },
-    tabs: {
-      query: vi.fn(async () => [{ id: 1 }]),
-      sendMessage: vi.fn(async () => undefined)
     }
   } as unknown as typeof chrome;
 
@@ -103,7 +99,7 @@ describe("background scenario expiry", () => {
     expect(typeof info.when).toBe("number");
   });
 
-  it("restores expired scenario and broadcasts when alarm fires", async () => {
+  it("restores expired scenario when alarm fires", async () => {
     const base = applyProfile("adhd");
     const expired = applyScenario(base, "focus_session", 30);
     const expiredAt = Date.now() - 1;
@@ -122,7 +118,7 @@ describe("background scenario expiry", () => {
     const stored = getSettings();
     expect(stored.activeScenario).toBeNull();
     expect(stored.profile).toBe("adhd");
-    expect(chrome.tabs.sendMessage).toHaveBeenCalled();
+    expect(chrome.storage.local.set).toHaveBeenCalled();
   });
 
   it("runs install/startup sync without throwing", async () => {
@@ -137,4 +133,3 @@ describe("background scenario expiry", () => {
     expect(chrome.storage.local.set).toHaveBeenCalled();
   });
 });
-

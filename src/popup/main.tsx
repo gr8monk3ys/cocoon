@@ -12,7 +12,7 @@ import {
   saveSettings,
   updateSiteFeedCleanerOverride
 } from "../lib/settings";
-import { broadcastSettings, openGroundingInActiveTab } from "../lib/messages";
+import { openGroundingInActiveTab } from "../lib/messages";
 import type { CocoonProfile, CocoonSettings, FeedIntensity, ScenarioType } from "../lib/types";
 
 async function getActiveHostname(): Promise<string | null> {
@@ -51,7 +51,6 @@ function PopupApp(): React.JSX.Element {
   const update = async (next: CocoonSettings): Promise<void> => {
     setSettings(next);
     await saveSettings(next);
-    await broadcastSettings(next);
   };
 
   const setProfile = async (profile: CocoonProfile): Promise<void> => {

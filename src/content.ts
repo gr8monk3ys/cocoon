@@ -5,7 +5,6 @@ import type { CocoonMessage, CocoonSettings } from "./lib/types";
 let styleTag: HTMLStyleElement | null = null;
 let groundingOverlay: HTMLDivElement | null = null;
 let previousFocusedElement: HTMLElement | null = null;
-let currentSettings: CocoonSettings | null = null;
 
 function ensureStyleTag(): HTMLStyleElement {
   if (!styleTag) {
@@ -116,7 +115,6 @@ function openGroundingOverlay(): void {
 }
 
 function applySettings(settings: CocoonSettings): void {
-  currentSettings = settings;
   const style = ensureStyleTag();
   style.textContent = buildCss(settings);
 }
@@ -126,9 +124,29 @@ chrome.runtime.onMessage.addListener((message: CocoonMessage) => {
     applySettings(message.payload);
   }
 
-  if (message.type === "COCOON_OPEN_GROUNDING" && currentSettings?.enableGroundingTool) {
-    openGroundingOverlay();
+  if (message.type === "COCOON_OPEN_GROUNDING") {
+    // Read from storage to avoid races (popup updates settings then immediately requests grounding).
+    void getSettings().then((settings) => {
+      if (!settings.enableGroundingTool) {
+        return;
+      }
+
+      applySettings(settings);
+      openGroundingOverlay();
+    });
   }
 });
 
 void getSettings().then(applySettings);
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== "local") {
+    return;
+  }
+
+  if (!changes.settings) {
+    return;
+  }
+
+  void getSettings().then(applySettings);
+});

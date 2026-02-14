@@ -34,7 +34,7 @@ Safety note: Cocoon is a supportive wellbeing and accessibility tool and is not 
 ## Permission justifications (Chrome Web Store)
 
 - `storage`: store your settings locally.
-- `tabs`: read the active tab's hostname so the popup can show and change the current-site override.
+- `activeTab`: read the active tab's hostname when you open the popup so Cocoon can show and change the current-site override.
 - `alarms`: auto-expire scenario quick-switches and restore your baseline settings after the timer ends.
 - Host permissions (supported domains only): required to run the content script on those sites.
 
@@ -43,4 +43,3 @@ Safety note: Cocoon is a supportive wellbeing and accessibility tool and is not 
 - Support email:
 - Website:
 - Privacy policy:
-
