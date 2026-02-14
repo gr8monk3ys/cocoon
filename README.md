@@ -10,7 +10,8 @@ This repository includes a production-hardening pass over the MVP:
 - Domain-scoped feed cleaner rules to reduce false positives
 - Accessibility upgrades for grounding dialog (semantics, Escape close, focus return)
 - **Per-site feed cleaner overrides** in popup and options UIs
-- Expanded unit test coverage for settings and feed-rule behavior
+- Timed scenario quick-switches with auto-expiry (alarm-driven baseline restore)
+- Expanded unit test coverage (UI flows + coverage-gated CI)
 - Upgraded build/test toolchain dependencies and audit cleanup
 - User-facing privacy and support documentation (`PRIVACY.md`, `SUPPORT.md`)
 
@@ -21,6 +22,8 @@ This repository includes a production-hardening pass over the MVP:
 3. **Feed cleaner**: hides algorithmic feed surfaces on supported social platforms
 4. **Grounding overlay**: quick breathing + 5-4-3-2-1 grounding flow
 5. **Per-site overrides**: enable/disable feed cleaner per supported domain
+6. **Scenario quick-switches**: one-tap temporary modes (default 30 minutes)
+7. **Adaptive suggestions**: optional domain + schedule rules that suggest profiles in the popup
 
 All settings are stored locally with `chrome.storage.local`.
 
@@ -49,7 +52,7 @@ All settings are stored locally with `chrome.storage.local`.
 - `src/options/main.tsx` – full settings + per-site override management
 - `src/lib/settings.ts` – typed settings + per-site override helpers
 - `src/lib/feedRules.ts` – domain-scoped feed cleaning rules
-- `PRIVACY.md` – user-facing privacy policy for beta
+- `PRIVACY.md` – user-facing privacy policy
 - `SUPPORT.md` – support workflow and safety notes
 - `PROFILE_RATIONALE.md` – profile intent and neurodivergent-fit guidance
 
@@ -64,10 +67,7 @@ npm install
 ### 2) Run quality checks
 
 ```bash
-npm run lint
-npm test
-npm run build
-npm audit --audit-level=moderate
+npm run check
 ```
 
 ### 3) Load extension in Chrome

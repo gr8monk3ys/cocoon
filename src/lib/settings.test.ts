@@ -6,6 +6,7 @@ import {
   getFeedIntensityForHost,
   normalizeHostname,
   removeSiteFeedCleanerOverride,
+  restoreExpiredScenario,
   updateSiteFeedCleanerOverride,
   upsertDomainRule,
   upsertScheduleRule
@@ -42,9 +43,20 @@ describe("site feed cleaner overrides", () => {
     expect(getFeedIntensityForHost(settings, "youtube.com")).toBe("full");
   });
 
+  it("applies root-domain override to subdomains", () => {
+    const settings = updateSiteFeedCleanerOverride(applyProfile("adhd"), "youtube.com", false);
+    expect(getFeedIntensityForHost(settings, "www.youtube.com")).toBe("full");
+  });
+
   it("removes per-site override", () => {
     const updated = updateSiteFeedCleanerOverride(applyProfile("adhd"), "youtube.com", false);
     const removed = removeSiteFeedCleanerOverride(updated, "youtube.com");
+    expect(removed.siteFeedCleanerOverrides["youtube.com"]).toBeUndefined();
+  });
+
+  it("removes root-domain override when removing a subdomain key", () => {
+    const updated = updateSiteFeedCleanerOverride(applyProfile("adhd"), "www.youtube.com", false);
+    const removed = removeSiteFeedCleanerOverride(updated, "www.youtube.com");
     expect(removed.siteFeedCleanerOverrides["youtube.com"]).toBeUndefined();
   });
 });
@@ -58,6 +70,14 @@ describe("adaptive suggestions and scenarios", () => {
     expect(getAdaptiveProfileSuggestion(settings, "reddit.com")).toBe("autism");
   });
 
+  it("suggests profile from domain rule on subdomains", () => {
+    let settings = applyProfile("adhd");
+    settings = { ...settings, adaptive: { ...settings.adaptive, enabled: true } };
+    settings = upsertDomainRule(settings, "reddit.com", "autism");
+
+    expect(getAdaptiveProfileSuggestion(settings, "www.reddit.com")).toBe("autism");
+  });
+
   it("suggests profile from schedule rule", () => {
     let settings = applyProfile("adhd");
     settings = { ...settings, adaptive: { ...settings.adaptive, enabled: true } };
@@ -69,7 +89,20 @@ describe("adaptive suggestions and scenarios", () => {
   it("applies scenario quick switch", () => {
     const settings = applyScenario(applyProfile("adhd"), "focus_session", 30);
     expect(settings.feedIntensity).toBe("none");
+    expect(settings.hideAlgorithmicFeeds).toBe(true);
     expect(settings.activeScenario?.type).toBe("focus_session");
     expect(settings.activeScenario?.expiresAt).not.toBeNull();
+  });
+
+  it("restores scenario baseline after expiry", () => {
+    const base = applyProfile("adhd");
+    const inScenario = applyScenario(base, "focus_session", 30);
+    const expiresAt = inScenario.activeScenario?.expiresAt ?? 0;
+
+    const restored = restoreExpiredScenario(inScenario, expiresAt + 1);
+    expect(restored.activeScenario).toBeNull();
+    expect(restored.profile).toBe("adhd");
+    expect(restored.feedIntensity).toBe("limited");
+    expect(restored.hideAlgorithmicFeeds).toBe(true);
   });
 });

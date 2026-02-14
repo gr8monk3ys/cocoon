@@ -2,6 +2,14 @@ export type CocoonProfile = "adhd" | "autism" | "anxiety" | "custom";
 export type FeedIntensity = "full" | "limited" | "none";
 export type ScenarioType = "focus_session" | "low_stimulation" | "calm_reset" | "social_guardrails";
 
+export interface ScenarioBaseline {
+  profile: CocoonProfile;
+  darkMode: boolean;
+  reduceMotion: boolean;
+  feedIntensity: FeedIntensity;
+  enableGroundingTool: boolean;
+}
+
 export interface AdaptiveScheduleRule {
   startHour: number;
   endHour: number;
@@ -18,6 +26,7 @@ export interface AdaptiveSettings {
 export interface ActiveScenario {
   type: ScenarioType;
   expiresAt: number | null;
+  baseline?: ScenarioBaseline;
 }
 
 export interface CocoonSettings {

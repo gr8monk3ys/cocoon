@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getSettings, saveSettings } from "./settings";
+import { getSettings, saveSettings, updateSettings } from "./settings";
 import { DEFAULT_SETTINGS } from "./types";
 
 function createStorageMock(stored: Record<string, unknown>): typeof chrome {
@@ -31,5 +31,14 @@ describe("storage settings", () => {
     await saveSettings(settings);
 
     expect(chrome.storage.local.set).toHaveBeenCalledWith({ settings });
+  });
+
+  it("updates settings via updater and persists the result", async () => {
+    vi.stubGlobal("chrome", createStorageMock({}));
+
+    const updated = await updateSettings((current) => ({ ...current, darkMode: true }));
+
+    expect(updated.darkMode).toBe(true);
+    expect(chrome.storage.local.set).toHaveBeenCalledWith({ settings: updated });
   });
 });

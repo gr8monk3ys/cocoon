@@ -1,15 +1,16 @@
 {
   "name": "cocoon-extension",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "preview": "vite preview",
-    "check": "npm run lint && npm test && npm run build && npm audit --audit-level=moderate",
+    "check": "npm run lint && npm run test:coverage && npm run build && npm audit --audit-level=moderate",
     "package:extension": "node scripts/package-extension.mjs",
     "release:verify": "node scripts/package-extension.mjs"
   },
@@ -28,6 +29,7 @@
     "@typescript-eslint/eslint-plugin": "^8.19.0",
     "@typescript-eslint/parser": "^8.19.0",
     "@vitejs/plugin-react": "^4.3.3",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^9.16.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",

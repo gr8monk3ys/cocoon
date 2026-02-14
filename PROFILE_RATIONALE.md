@@ -83,7 +83,7 @@ Use custom when:
 
 ## Known limitations
 
-- No profile currently adapts automatically to context or time-of-day.
+- Adaptive profile suggestions (domain rules + time schedules) are opt-in and suggestions-only today; Cocoon does not auto-switch profiles without an explicit user action.
 - No dedicated dyslexia reading preset yet.
 - No language/tone interpretation helper yet (e.g., sarcasm support).
 

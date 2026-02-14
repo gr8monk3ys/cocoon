@@ -6,8 +6,10 @@ import {
   type CocoonProfile,
   type CocoonSettings,
   type FeedIntensity,
+  type ScenarioBaseline,
   type ScenarioType
 } from "./types";
+import { getSupportedRootHost } from "./feedRules";
 
 const STORAGE_KEY = "settings";
 
@@ -21,7 +23,13 @@ export function applyProfile(profile: CocoonProfile): CocoonSettings {
 
 export function getFeedIntensityForHost(settings: CocoonSettings, hostname: string): FeedIntensity {
   const normalized = normalizeHostname(hostname);
-  const override = settings.siteFeedCleanerOverrides[normalized];
+  let override = settings.siteFeedCleanerOverrides[normalized];
+  if (override === undefined) {
+    const rootHost = getSupportedRootHost(normalized);
+    if (rootHost && rootHost !== normalized) {
+      override = settings.siteFeedCleanerOverrides[rootHost];
+    }
+  }
   if (override === true) {
     return "limited";
   }
@@ -43,14 +51,20 @@ export function updateSiteFeedCleanerOverride(
   enabled: boolean
 ): CocoonSettings {
   const normalized = normalizeHostname(hostname);
-  const nextOverrides = { ...settings.siteFeedCleanerOverrides, [normalized]: enabled };
+  const rootHost = getSupportedRootHost(normalized);
+  const key = rootHost ?? normalized;
+  const nextOverrides = { ...settings.siteFeedCleanerOverrides, [key]: enabled };
   return { ...settings, siteFeedCleanerOverrides: nextOverrides };
 }
 
 export function removeSiteFeedCleanerOverride(settings: CocoonSettings, hostname: string): CocoonSettings {
   const normalized = normalizeHostname(hostname);
+  const rootHost = getSupportedRootHost(normalized);
   const nextOverrides = { ...settings.siteFeedCleanerOverrides };
   delete nextOverrides[normalized];
+  if (rootHost && rootHost !== normalized) {
+    delete nextOverrides[rootHost];
+  }
   return { ...settings, siteFeedCleanerOverrides: nextOverrides };
 }
 
@@ -60,19 +74,25 @@ export function upsertDomainRule(
   profile: CocoonProfile
 ): CocoonSettings {
   const normalized = normalizeHostname(hostname);
+  const rootHost = getSupportedRootHost(normalized);
+  const key = rootHost ?? normalized;
   return {
     ...settings,
     adaptive: {
       ...settings.adaptive,
-      domainRules: { ...settings.adaptive.domainRules, [normalized]: profile }
+      domainRules: { ...settings.adaptive.domainRules, [key]: profile }
     }
   };
 }
 
 export function removeDomainRule(settings: CocoonSettings, hostname: string): CocoonSettings {
   const normalized = normalizeHostname(hostname);
+  const rootHost = getSupportedRootHost(normalized);
   const domainRules = { ...settings.adaptive.domainRules };
   delete domainRules[normalized];
+  if (rootHost && rootHost !== normalized) {
+    delete domainRules[rootHost];
+  }
   return { ...settings, adaptive: { ...settings.adaptive, domainRules } };
 }
 
@@ -114,7 +134,13 @@ export function getAdaptiveProfileSuggestion(
   }
 
   const normalized = normalizeHostname(hostname);
-  const domainProfile = settings.adaptive.domainRules[normalized];
+  let domainProfile = settings.adaptive.domainRules[normalized];
+  if (!domainProfile) {
+    const rootHost = getSupportedRootHost(normalized);
+    if (rootHost && rootHost !== normalized) {
+      domainProfile = settings.adaptive.domainRules[rootHost];
+    }
+  }
   if (domainProfile) {
     return domainProfile;
   }
@@ -140,17 +166,36 @@ function scenarioPatch(type: ScenarioType): Partial<CocoonSettings> {
   return { reduceMotion: true, feedIntensity: "limited" };
 }
 
+function buildScenarioBaseline(settings: CocoonSettings): ScenarioBaseline {
+  return {
+    profile: settings.profile,
+    darkMode: settings.darkMode,
+    reduceMotion: settings.reduceMotion,
+    feedIntensity: settings.feedIntensity,
+    enableGroundingTool: settings.enableGroundingTool
+  };
+}
+
 export function applyScenario(
   settings: CocoonSettings,
   type: ScenarioType,
   durationMinutes?: number
 ): CocoonSettings {
   const expiresAt = typeof durationMinutes === "number" ? Date.now() + durationMinutes * 60_000 : null;
-  const activeScenario: ActiveScenario = { type, expiresAt };
-  return { ...settings, ...scenarioPatch(type), profile: "custom", activeScenario };
+  const baseline = settings.activeScenario?.baseline ?? buildScenarioBaseline(settings);
+  const activeScenario: ActiveScenario = { type, expiresAt, baseline };
+  const patch = scenarioPatch(type);
+  const nextFeedIntensity = patch.feedIntensity ?? settings.feedIntensity;
+  return {
+    ...settings,
+    ...patch,
+    profile: "custom",
+    hideAlgorithmicFeeds: nextFeedIntensity !== "full",
+    activeScenario
+  };
 }
 
-export function clearExpiredScenario(settings: CocoonSettings, now: number = Date.now()): CocoonSettings {
+export function restoreExpiredScenario(settings: CocoonSettings, now: number = Date.now()): CocoonSettings {
   if (!settings.activeScenario?.expiresAt) {
     return settings;
   }
@@ -159,7 +204,21 @@ export function clearExpiredScenario(settings: CocoonSettings, now: number = Dat
     return settings;
   }
 
-  return { ...settings, activeScenario: null };
+  const baseline = settings.activeScenario.baseline;
+  if (!baseline) {
+    return { ...settings, activeScenario: null };
+  }
+
+  return {
+    ...settings,
+    profile: baseline.profile,
+    darkMode: baseline.darkMode,
+    reduceMotion: baseline.reduceMotion,
+    feedIntensity: baseline.feedIntensity,
+    hideAlgorithmicFeeds: baseline.feedIntensity !== "full",
+    enableGroundingTool: baseline.enableGroundingTool,
+    activeScenario: null
+  };
 }
 
 function migrateSettings(raw: Partial<CocoonSettings> | undefined): CocoonSettings {

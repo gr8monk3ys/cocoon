@@ -20,5 +20,9 @@ export async function openGroundingInActiveTab(): Promise<void> {
     return;
   }
 
-  await chrome.tabs.sendMessage(tab.id, { type: "COCOON_OPEN_GROUNDING" });
+  try {
+    await chrome.tabs.sendMessage(tab.id, { type: "COCOON_OPEN_GROUNDING" });
+  } catch {
+    // Most commonly: no content script is listening on this tab (unsupported domain / chrome:// / etc).
+  }
 }

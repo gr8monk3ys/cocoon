@@ -34,6 +34,7 @@ describe("content grounding accessibility", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.restoreAllMocks();
+    document.querySelectorAll("#cocoon-style, #cocoon-grounding").forEach((el) => el.remove());
     document.body.innerHTML = '<button id="origin">Focus origin</button>';
     const originButton = document.getElementById("origin") as HTMLButtonElement;
     originButton.focus();
@@ -55,6 +56,51 @@ describe("content grounding accessibility", () => {
     expect(document.activeElement?.id).toBe("cocoon-close");
 
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+    expect(document.getElementById("cocoon-grounding")).toBeNull();
+    expect(document.activeElement?.id).toBe("origin");
+  });
+
+  it("applies css, avoids duplicate overlays, and closes on backdrop click", async () => {
+    const { chromeMock, send } = createChromeMock();
+    vi.stubGlobal("chrome", chromeMock);
+
+    await import("./content");
+    // Allow the initial getSettings() call in the module to resolve and apply defaults.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    send({
+      type: "COCOON_APPLY_SETTINGS",
+      payload: {
+        ...DEFAULT_SETTINGS,
+        darkMode: true,
+        reduceMotion: false,
+        feedIntensity: "full",
+        hideAlgorithmicFeeds: false,
+        enableGroundingTool: false
+      }
+    });
+
+    const style = document.getElementById("cocoon-style") as HTMLStyleElement;
+    expect(style).toBeTruthy();
+    expect(style.textContent).toContain("hue-rotate(180deg)");
+    expect(style.textContent).not.toContain("animation: none !important");
+    expect(style.textContent).not.toContain("display: none !important");
+
+    send({ type: "COCOON_OPEN_GROUNDING" });
+    expect(document.getElementById("cocoon-grounding")).toBeNull();
+
+    send({
+      type: "COCOON_APPLY_SETTINGS",
+      payload: { ...DEFAULT_SETTINGS, enableGroundingTool: true, darkMode: true }
+    });
+
+    send({ type: "COCOON_OPEN_GROUNDING" });
+    send({ type: "COCOON_OPEN_GROUNDING" });
+    expect(document.querySelectorAll("#cocoon-grounding")).toHaveLength(1);
+
+    const overlay = document.getElementById("cocoon-grounding") as HTMLDivElement;
+    overlay.click();
 
     expect(document.getElementById("cocoon-grounding")).toBeNull();
     expect(document.activeElement?.id).toBe("origin");

@@ -1,0 +1,116 @@
+:root {
+  --bg0: #f7f3ea;
+  --bg1: #ffffff;
+  --ink: #0a2124;
+  --muted: #294548;
+  --border: rgba(10, 33, 36, 0.12);
+  --accent: #1f6f68;
+  --accent-ink: #083033;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: radial-gradient(1200px 700px at 20% -10%, rgba(31, 111, 104, 0.14), transparent 60%),
+    radial-gradient(900px 600px at 90% 10%, rgba(31, 111, 104, 0.10), transparent 55%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 40px 16px 64px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+header img {
+  width: 56px;
+  height: 56px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+nav {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 12px 0 18px;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 18px 8px;
+  backdrop-filter: blur(8px);
+}
+
+.card + .card {
+  margin-top: 14px;
+}
+
+.meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+code {
+  background: rgba(31, 111, 104, 0.08);
+  border: 1px solid rgba(31, 111, 104, 0.18);
+  padding: 0 6px;
+  border-radius: 6px;
+  font-size: 0.95em;
+}
+
+ul,
+ol {
+  padding-left: 20px;
+}
+
+.pill {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(31, 111, 104, 0.10);
+  border: 1px solid rgba(31, 111, 104, 0.20);
+  color: var(--accent-ink);
+  font-size: 13px;
+}
+

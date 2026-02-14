@@ -20,14 +20,19 @@ const FEED_RULES: Record<string, string[]> = {
   "tiktok.com": ["[data-e2e='recommend-list']", "div[data-e2e='video-feed-item']"]
 };
 
+/** Returns the supported "root" host for a subdomain, if any (e.g. www.youtube.com -> youtube.com). */
+export function getSupportedRootHost(hostname: string): (typeof SOCIAL_HOSTS)[number] | null {
+  return SOCIAL_HOSTS.find((host) => hostname === host || hostname.endsWith(`.${host}`)) ?? null;
+}
+
 /** Returns true when a hostname is in the supported social-domain set for feed cleaning. */
 export function supportsFeedCleaner(hostname: string): boolean {
-  return SOCIAL_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`));
+  return getSupportedRootHost(hostname) !== null;
 }
 
 /** Returns scoped CSS selectors for feed surfaces on a supported hostname. */
 export function getFeedSelectors(hostname: string): string[] {
-  const matchedHost = SOCIAL_HOSTS.find((host) => hostname === host || hostname.endsWith(`.${host}`));
+  const matchedHost = getSupportedRootHost(hostname);
   if (!matchedHost) {
     return [];
   }

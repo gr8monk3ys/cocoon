@@ -1,13 +1,13 @@
-# Cocoon Privacy Policy (Beta)
+# Cocoon Privacy Policy
 
-_Last updated: 2026-02-11_
+_Last updated: 2026-02-14_
 
 ## Summary
 
 Cocoon is designed to process browsing-adaptation settings locally on your device.
 
 - We do **not** run third-party advertising trackers.
-- We do **not** transmit your browsing content to cloud services in this beta.
+- We do **not** transmit your browsing content to cloud services.
 - We store extension settings in `chrome.storage.local`.
 
 ## Data we store
@@ -18,10 +18,12 @@ Cocoon stores only user-configured settings such as:
 - sensory and feed-cleaner toggle state
 - grounding tool toggle state
 - per-site feed-cleaner overrides
+- adaptive suggestion rules (if enabled)
+- active scenario quick-switch state (if used)
 
 This data remains local to your browser profile.
 
-## Data we do not collect in beta
+## Data we do not collect
 
 - No account registration data
 - No remote analytics events
@@ -34,6 +36,7 @@ Cocoon requests:
 
 - `storage`: to save your extension settings
 - `tabs`: to read active-tab URL metadata for current-site controls
+- `alarms`: to auto-expire timed scenario quick-switches and restore baseline settings
 - host permissions for supported social domains only, so content scripts can apply selected controls
 
 ## Security and retention

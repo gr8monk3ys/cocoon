@@ -97,7 +97,7 @@ function PopupApp(): React.JSX.Element {
 
   return (
     <main style={{ width: 340, padding: 16, fontFamily: "system-ui, sans-serif" }}>
-      <h1 style={{ fontSize: 20, margin: "0 0 12px" }}>Cocoon Beta</h1>
+      <h1 style={{ fontSize: 20, margin: "0 0 12px" }}>Cocoon</h1>
 
       <label style={{ display: "block", marginBottom: 10 }}>
         Profile

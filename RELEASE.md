@@ -5,6 +5,7 @@
 - All CI checks pass (`lint`, `test`, `build`, `audit`).
 - Accessibility checklist has been completed for this release.
 - Domain QA has been run for supported social platforms.
+- Public Chrome Web Store URLs are live (site + privacy + support pages under `docs/`).
 
 ## Versioning
 
@@ -29,5 +30,6 @@ This command:
 ## Submit
 
 1. Upload zip artifact to Chrome Web Store.
-2. Include release notes with domain-rule changes and accessibility notes.
-3. Monitor early rollout feedback and rollback quickly if feed selectors regress.
+2. Copy/paste the listing URLs and permission justifications from the release folder (for example `release/0.2.1/`).
+3. Include release notes with domain-rule changes and accessibility notes.
+4. Monitor early rollout feedback and rollback quickly if feed selectors regress.
