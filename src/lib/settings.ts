@@ -222,9 +222,14 @@ function migrateSettings(raw: Partial<CocoonSettings> | undefined): CocoonSettin
   };
 }
 
-export async function getSettings(): Promise<CocoonSettings> {
+/** Reads + migrates stored settings WITHOUT clearing an expired scenario. */
+export async function readStoredSettings(): Promise<CocoonSettings> {
   const result = await chrome.storage.local.get(STORAGE_KEY);
-  return clearExpiredScenario(migrateSettings(result[STORAGE_KEY] as Partial<CocoonSettings> | undefined));
+  return migrateSettings(result[STORAGE_KEY] as Partial<CocoonSettings> | undefined);
+}
+
+export async function getSettings(): Promise<CocoonSettings> {
+  return clearExpiredScenario(await readStoredSettings());
 }
 
 export async function saveSettings(settings: CocoonSettings): Promise<void> {

@@ -44,6 +44,8 @@ Copy/paste content for the Web Store developer dashboard. Keep this in sync with
   overrides) locally on the device. No data leaves the browser.
 - **activeTab** — When the user opens the popup, read only the active tab's
   hostname to show the correct per-site feed-cleaner control.
+- **alarms** — Schedule a single timer so a duration-limited scenario
+  quick-switch automatically ends and restores the user's baseline settings.
 - **host permissions (the 7 supported social domains)** — Inject the content
   script that applies the selected visual adaptations on those sites only. No
   `<all_urls>`; the extension does nothing on other sites.
@@ -58,8 +60,14 @@ Copy/paste content for the Web Store developer dashboard. Keep this in sync with
 
 ## Privacy policy URL (required)
 
-Host `docs/PRIVACY.md` at a public URL and paste it here, e.g.
-`https://github.com/<owner>/<repo>/blob/main/docs/PRIVACY.md`.
+Published via GitHub Pages from `docs/` (see `.github/workflows/pages.yml`):
+
+- Privacy: `https://gr8monk3ys.github.io/cocoon/privacy/`
+- Support: `https://gr8monk3ys.github.io/cocoon/support/`
+
+**One-time setup:** enable Pages in repo Settings → Pages → Build and deployment
+→ Source: **GitHub Actions**. The `Pages` workflow then deploys on every push to
+`main` that touches `docs/`.
 
 ## Assets to upload (you must create these)
 
