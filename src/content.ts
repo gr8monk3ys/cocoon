@@ -7,6 +7,7 @@ let groundingOverlay: HTMLDivElement | null = null;
 let previousFocusedElement: HTMLElement | null = null;
 let currentSettings: CocoonSettings | null = null;
 let feedBanner: HTMLDivElement | null = null;
+let feedBannerDismissed = false;
 
 function ensureStyleTag(): HTMLStyleElement {
   if (!styleTag) {
@@ -159,7 +160,9 @@ function removeFeedBanner(): void {
 }
 
 function updateFeedBanner(intensity: FeedIntensity): void {
-  if (!document.body) {
+  // Once dismissed, stay dismissed for the lifetime of this page (a later
+  // settings save must not resurrect the banner).
+  if (feedBannerDismissed || !document.body) {
     return;
   }
 
@@ -180,7 +183,10 @@ function updateFeedBanner(intensity: FeedIntensity): void {
     dismiss.setAttribute("aria-label", "Dismiss Cocoon feed notice");
     dismiss.style.cssText =
       "margin-left:auto;border:0;background:#2457ff;color:#fff;padding:4px 10px;border-radius:6px;cursor:pointer;";
-    dismiss.addEventListener("click", removeFeedBanner);
+    dismiss.addEventListener("click", () => {
+      feedBannerDismissed = true;
+      removeFeedBanner();
+    });
     feedBanner.appendChild(dismiss);
 
     document.body.prepend(feedBanner);

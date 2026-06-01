@@ -121,6 +121,17 @@ describe("applyProfile preserves user data", () => {
     expect(result.siteFeedCleanerOverrides).toEqual({});
     expect(result.adaptive.scheduleRules).toEqual([]);
   });
+
+  it("cancels an active scenario on a manual profile switch", () => {
+    const active = applyScenario(applyProfile("adhd"), "focus_session", 30);
+    expect(active.activeScenario).not.toBeNull();
+
+    const switched = applyProfile("autism", active);
+
+    // A later expiry must not resurrect the pre-scenario profile.
+    expect(switched.activeScenario).toBeNull();
+    expect(switched.profile).toBe("autism");
+  });
 });
 
 describe("per-site override never cleans less than the global setting", () => {

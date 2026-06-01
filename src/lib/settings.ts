@@ -22,14 +22,15 @@ export function applyProfile(profile: CocoonProfile, current?: CocoonSettings): 
   }
 
   // Presets carry empty overrides/adaptive defaults; preserve the user's
-  // per-site overrides, adaptive rules, and active scenario across a profile
-  // switch instead of silently wiping them.
+  // per-site overrides and adaptive rules across a profile switch instead of
+  // silently wiping them. A manual profile switch is an explicit choice, so it
+  // cancels any active scenario (preset.activeScenario is null) rather than
+  // letting the scenario later restore the pre-scenario profile.
   return {
     ...preset,
     profile,
     siteFeedCleanerOverrides: current.siteFeedCleanerOverrides,
-    adaptive: current.adaptive,
-    activeScenario: current.activeScenario
+    adaptive: current.adaptive
   };
 }
 
