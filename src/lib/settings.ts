@@ -167,7 +167,10 @@ export function applyScenario(
   durationMinutes?: number
 ): CocoonSettings {
   const expiresAt = typeof durationMinutes === "number" ? Date.now() + durationMinutes * 60_000 : null;
-  const previous: ScenarioRestoreSnapshot = {
+  // If a scenario is already active, carry forward its original baseline instead
+  // of snapshotting the current (already-patched) settings — otherwise stacking
+  // scenarios would strand the user in the first scenario's restrictive values.
+  const previous: ScenarioRestoreSnapshot = settings.activeScenario?.previous ?? {
     profile: settings.profile,
     darkMode: settings.darkMode,
     reduceMotion: settings.reduceMotion,

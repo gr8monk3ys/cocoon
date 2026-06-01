@@ -176,6 +176,20 @@ describe("clearExpiredScenario", () => {
     expect(result.feedIntensity).toBe("none");
   });
 
+  it("keeps the original baseline when one scenario replaces another", () => {
+    const base = applyProfile("adhd"); // profile adhd, feedIntensity limited
+    const first = applyScenario(base, "focus_session", 30); // patches to "none"
+    const second = applyScenario(first, "low_stimulation", 30); // started before first expired
+
+    expect(second.activeScenario?.previous?.profile).toBe("adhd");
+    expect(second.activeScenario?.previous?.feedIntensity).toBe("limited");
+
+    const expiresAt = second.activeScenario?.expiresAt as number;
+    const restored = clearExpiredScenario(second, expiresAt + 1);
+    expect(restored.profile).toBe("adhd");
+    expect(restored.feedIntensity).toBe("limited");
+  });
+
   it("clears the marker for a legacy scenario without a restore snapshot", () => {
     const settings = {
       ...applyProfile("adhd"),
