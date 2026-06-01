@@ -16,7 +16,12 @@ import struct
 import zlib
 
 OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "public", "icons")
+DOCS_ASSETS = os.path.join(os.path.dirname(__file__), "..", "docs", "assets")
+# Sizes the extension manifest references (shipped in the zip).
 SIZES = [16, 32, 48, 128]
+# Sizes mirrored into the GitHub Pages site so its logo matches the extension.
+# 512 is site/store-only, so it is not written into public/icons.
+SITE_SIZES = [128, 512]
 
 # Palette
 TOP = (0x63, 0x6E, 0xFA)  # periwinkle indigo
@@ -128,12 +133,20 @@ SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBo
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
+    rendered = {}
     for size in SIZES:
-        write_png(os.path.join(OUT_DIR, f"icon-{size}.png"), size, render(size))
+        rendered[size] = render(size)
+        write_png(os.path.join(OUT_DIR, f"icon-{size}.png"), size, rendered[size])
         print(f"wrote icon-{size}.png")
     with open(os.path.join(OUT_DIR, "icon.svg"), "w") as f:
         f.write(SVG)
     print("wrote icon.svg")
+
+    os.makedirs(DOCS_ASSETS, exist_ok=True)
+    for size in SITE_SIZES:
+        px = rendered.get(size) or render(size)
+        write_png(os.path.join(DOCS_ASSETS, f"icon-{size}.png"), size, px)
+        print(f"wrote docs/assets/icon-{size}.png")
 
 
 if __name__ == "__main__":

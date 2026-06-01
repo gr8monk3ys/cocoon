@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cocoon Privacy Policy</title>
+    <link rel="stylesheet" href="../assets/site.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="../assets/icon-128.png" alt="Cocoon logo" />
+        <div>
+          <h1>Privacy Policy</h1>
+          <p class="subtitle">Cocoon is designed to keep your settings local to your device.</p>
+        </div>
+      </header>
+
+      <nav>
+        <a class="pill" href="../">Home</a>
+        <a class="pill" href="../support/">Support</a>
+      </nav>
+
+      <section class="card">
+        <p class="meta">Last updated: 2026-02-14</p>
+        <h2>Summary</h2>
+        <ul>
+          <li>We do not run third-party advertising trackers.</li>
+          <li>We do not transmit your browsing content to cloud services.</li>
+          <li>We store extension settings locally using <code>chrome.storage.local</code>.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Data We Store</h2>
+        <p>Cocoon stores only user-configured settings such as:</p>
+        <ul>
+          <li>profile preset selection</li>
+          <li>sensory and feed-cleaner toggle state</li>
+          <li>grounding tool toggle state</li>
+          <li>per-site feed-cleaner overrides</li>
+          <li>adaptive suggestion rules (if enabled)</li>
+        </ul>
+        <p>This data remains local to your browser profile.</p>
+      </section>
+
+      <section class="card">
+        <h2>Data We Do Not Collect</h2>
+        <ul>
+          <li>No account registration data</li>
+          <li>No remote analytics events</li>
+          <li>No cloud storage of browsing content</li>
+          <li>No sale of personal information</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Permissions Usage</h2>
+        <p>Cocoon requests:</p>
+        <ul>
+          <li><code>storage</code>: to save your extension settings</li>
+          <li><code>activeTab</code>: to read the active tab hostname when you open the popup (for current-site controls)</li>
+          <li>
+            <code>alarms</code>: to auto-expire timed scenario quick-switches and restore baseline settings (no browsing
+            content is sent anywhere)
+          </li>
+          <li>
+            host permissions for supported social domains only, so content scripts can apply selected controls on those
+            sites
+          </li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Security and Retention</h2>
+        <ul>
+          <li>Settings persist until you remove the extension or clear extension storage.</li>
+          <li>You can reset settings from the options page.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Contact</h2>
+        <p>
+          For privacy questions or deletion requests related to local settings behavior, see the
+          <a href="../support/">support page</a> and include your extension version.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

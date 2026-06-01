@@ -34,6 +34,7 @@ Cocoon requests:
 
 - `storage`: to save your extension settings
 - `activeTab`: to read the active tab's URL for current-site controls when you open the popup
+- `alarms`: to automatically end timed scenario quick-switches and restore your baseline settings (no browsing data involved)
 - host permissions for supported social domains only, so content scripts can apply selected controls
 
 ## Security and retention
