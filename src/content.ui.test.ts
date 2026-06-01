@@ -53,10 +53,28 @@ describe("content grounding accessibility", () => {
     expect(overlay.getAttribute("role")).toBe("dialog");
     expect(overlay.getAttribute("aria-modal")).toBe("true");
     expect(document.activeElement?.id).toBe("cocoon-close");
+    expect(overlay.querySelector("#cocoon-breath-cue")?.textContent).toContain("Round 1 of 4");
 
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
 
     expect(document.getElementById("cocoon-grounding")).toBeNull();
     expect(document.activeElement?.id).toBe("origin");
+  });
+
+  it("traps Tab focus inside the dialog", async () => {
+    const { chromeMock, send } = createChromeMock();
+    vi.stubGlobal("chrome", chromeMock);
+
+    await import("./content");
+
+    send({ type: "COCOON_APPLY_SETTINGS", payload: { ...DEFAULT_SETTINGS, enableGroundingTool: true } });
+    send({ type: "COCOON_OPEN_GROUNDING" });
+
+    // Simulate focus escaping to the page behind the modal, then press Tab.
+    (document.getElementById("origin") as HTMLButtonElement).focus();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+
+    // Focus is pulled back into the dialog instead of staying on the page.
+    expect(document.activeElement?.id).toBe("cocoon-close");
   });
 });

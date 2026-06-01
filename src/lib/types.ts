@@ -15,9 +15,21 @@ export interface AdaptiveSettings {
   domainRules: Record<string, CocoonProfile>;
 }
 
+/** Snapshot of the settings a scenario overrode, so expiry can restore them. */
+export interface ScenarioRestoreSnapshot {
+  profile: CocoonProfile;
+  darkMode: boolean;
+  reduceMotion: boolean;
+  feedIntensity: FeedIntensity;
+  hideAlgorithmicFeeds: boolean;
+  enableGroundingTool: boolean;
+}
+
 export interface ActiveScenario {
   type: ScenarioType;
   expiresAt: number | null;
+  /** Settings to restore when the scenario expires; null for legacy/un-snapshotted scenarios. */
+  previous: ScenarioRestoreSnapshot | null;
 }
 
 export interface CocoonSettings {

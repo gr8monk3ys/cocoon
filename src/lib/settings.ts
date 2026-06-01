@@ -1,11 +1,11 @@
 import {
   DEFAULT_SETTINGS,
   PROFILE_PRESETS,
-  type ActiveScenario,
   type AdaptiveScheduleRule,
   type CocoonProfile,
   type CocoonSettings,
   type FeedIntensity,
+  type ScenarioRestoreSnapshot,
   type ScenarioType
 } from "./types";
 
@@ -15,15 +15,32 @@ export function normalizeHostname(hostname: string): string {
   return hostname.trim().toLowerCase().replace(/\.$/, "");
 }
 
-export function applyProfile(profile: CocoonProfile): CocoonSettings {
-  return { ...PROFILE_PRESETS[profile], profile };
+export function applyProfile(profile: CocoonProfile, current?: CocoonSettings): CocoonSettings {
+  const preset = PROFILE_PRESETS[profile];
+  if (!current) {
+    return { ...preset, profile };
+  }
+
+  // Presets carry empty overrides/adaptive defaults; preserve the user's
+  // per-site overrides and adaptive rules across a profile switch instead of
+  // silently wiping them. A manual profile switch is an explicit choice, so it
+  // cancels any active scenario (preset.activeScenario is null) rather than
+  // letting the scenario later restore the pre-scenario profile.
+  return {
+    ...preset,
+    profile,
+    siteFeedCleanerOverrides: current.siteFeedCleanerOverrides,
+    adaptive: current.adaptive
+  };
 }
 
 export function getFeedIntensityForHost(settings: CocoonSettings, hostname: string): FeedIntensity {
   const normalized = normalizeHostname(hostname);
   const override = settings.siteFeedCleanerOverrides[normalized];
   if (override === true) {
-    return "limited";
+    // Per-site "enable" must never clean less than the global setting:
+    // upgrade only when the global default is "full" (off).
+    return settings.feedIntensity === "full" ? "limited" : settings.feedIntensity;
   }
 
   if (override === false) {
@@ -137,6 +154,10 @@ function scenarioPatch(type: ScenarioType): Partial<CocoonSettings> {
     return { darkMode: true, reduceMotion: true, feedIntensity: "limited", enableGroundingTool: true };
   }
 
+  if (type === "social_guardrails") {
+    return { reduceMotion: true, feedIntensity: "none", enableGroundingTool: true };
+  }
+
   return { reduceMotion: true, feedIntensity: "limited" };
 }
 
@@ -146,17 +167,39 @@ export function applyScenario(
   durationMinutes?: number
 ): CocoonSettings {
   const expiresAt = typeof durationMinutes === "number" ? Date.now() + durationMinutes * 60_000 : null;
-  const activeScenario: ActiveScenario = { type, expiresAt };
-  return { ...settings, ...scenarioPatch(type), profile: "custom", activeScenario };
+  // If a scenario is already active, carry forward its original baseline instead
+  // of snapshotting the current (already-patched) settings — otherwise stacking
+  // scenarios would strand the user in the first scenario's restrictive values.
+  const previous: ScenarioRestoreSnapshot = settings.activeScenario?.previous ?? {
+    profile: settings.profile,
+    darkMode: settings.darkMode,
+    reduceMotion: settings.reduceMotion,
+    feedIntensity: settings.feedIntensity,
+    hideAlgorithmicFeeds: settings.hideAlgorithmicFeeds,
+    enableGroundingTool: settings.enableGroundingTool
+  };
+  const patched = { ...settings, ...scenarioPatch(type), profile: "custom" as const };
+  return {
+    ...patched,
+    // Keep the legacy mirror in sync with the patched intensity.
+    hideAlgorithmicFeeds: patched.feedIntensity !== "full",
+    activeScenario: { type, expiresAt, previous }
+  };
 }
 
 export function clearExpiredScenario(settings: CocoonSettings, now: number = Date.now()): CocoonSettings {
-  if (!settings.activeScenario?.expiresAt) {
+  const scenario = settings.activeScenario;
+  if (!scenario?.expiresAt) {
     return settings;
   }
 
-  if (now < settings.activeScenario.expiresAt) {
+  if (now < scenario.expiresAt) {
     return settings;
+  }
+
+  // Expired: restore the pre-scenario settings if we captured them.
+  if (scenario.previous) {
+    return { ...settings, ...scenario.previous, activeScenario: null };
   }
 
   return { ...settings, activeScenario: null };
@@ -164,7 +207,13 @@ export function clearExpiredScenario(settings: CocoonSettings, now: number = Dat
 
 function migrateSettings(raw: Partial<CocoonSettings> | undefined): CocoonSettings {
   const merged = { ...DEFAULT_SETTINGS, ...(raw ?? {}) };
-  const feedIntensity = merged.feedIntensity ?? (merged.hideAlgorithmicFeeds ? "limited" : "full");
+  // Derive intensity from the legacy `hideAlgorithmicFeeds` flag only when the
+  // stored data predates `feedIntensity`. Read from `raw`, not `merged`, since
+  // `merged` always inherits DEFAULT_SETTINGS.feedIntensity and would mask it.
+  const legacyHide = raw?.hideAlgorithmicFeeds;
+  const feedIntensity: FeedIntensity =
+    raw?.feedIntensity ??
+    (typeof legacyHide === "boolean" ? (legacyHide ? "limited" : "full") : DEFAULT_SETTINGS.feedIntensity);
   return {
     ...merged,
     hideAlgorithmicFeeds: feedIntensity !== "full",
@@ -175,7 +224,7 @@ function migrateSettings(raw: Partial<CocoonSettings> | undefined): CocoonSettin
 
 export async function getSettings(): Promise<CocoonSettings> {
   const result = await chrome.storage.local.get(STORAGE_KEY);
-  return migrateSettings(result[STORAGE_KEY] as Partial<CocoonSettings> | undefined);
+  return clearExpiredScenario(migrateSettings(result[STORAGE_KEY] as Partial<CocoonSettings> | undefined));
 }
 
 export async function saveSettings(settings: CocoonSettings): Promise<void> {

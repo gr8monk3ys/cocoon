@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { supportsFeedCleaner } from "../lib/feedRules";
 import {
@@ -44,6 +44,30 @@ function PopupApp(): React.JSX.Element {
     void getActiveHostname().then(setActiveHostname);
   }, []);
 
+  // When adaptive is enabled and the user opted out of suggest-only mode,
+  // auto-apply the suggested profile once per visited host. Guarded by a ref so
+  // it applies on popup open but does not fight the user's later manual toggles.
+  const autoAppliedHostRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!settings || !activeHostname) {
+      return;
+    }
+    if (autoAppliedHostRef.current === activeHostname) {
+      return;
+    }
+    if (!settings.adaptive.enabled || settings.adaptive.suggestOnly) {
+      return;
+    }
+    autoAppliedHostRef.current = activeHostname;
+    const suggested = getAdaptiveProfileSuggestion(settings, activeHostname);
+    if (!suggested || suggested === settings.profile) {
+      return;
+    }
+    const next = applyProfile(suggested, settings);
+    setSettings(next);
+    void saveSettings(next).then(() => broadcastSettings(next));
+  }, [settings, activeHostname]);
+
   if (!settings) {
     return <main style={{ width: 340, padding: 16 }}>Loading…</main>;
   }
@@ -55,7 +79,7 @@ function PopupApp(): React.JSX.Element {
   };
 
   const setProfile = async (profile: CocoonProfile): Promise<void> => {
-    await update(profile === "custom" ? { ...settings, profile } : applyProfile(profile));
+    await update(profile === "custom" ? { ...settings, profile } : applyProfile(profile, settings));
   };
 
   const toggle =
