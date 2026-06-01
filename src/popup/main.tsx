@@ -44,6 +44,24 @@ function PopupApp(): React.JSX.Element {
     void getActiveHostname().then(setActiveHostname);
   }, []);
 
+  // When adaptive is enabled and the user opted out of suggest-only mode,
+  // auto-apply the suggested profile instead of only displaying a banner.
+  useEffect(() => {
+    if (!settings || !activeHostname) {
+      return;
+    }
+    if (!settings.adaptive.enabled || settings.adaptive.suggestOnly) {
+      return;
+    }
+    const suggested = getAdaptiveProfileSuggestion(settings, activeHostname);
+    if (!suggested || suggested === settings.profile) {
+      return;
+    }
+    const next = applyProfile(suggested, settings);
+    setSettings(next);
+    void saveSettings(next).then(() => broadcastSettings(next));
+  }, [settings, activeHostname]);
+
   if (!settings) {
     return <main style={{ width: 340, padding: 16 }}>Loading…</main>;
   }
@@ -55,7 +73,7 @@ function PopupApp(): React.JSX.Element {
   };
 
   const setProfile = async (profile: CocoonProfile): Promise<void> => {
-    await update(profile === "custom" ? { ...settings, profile } : applyProfile(profile));
+    await update(profile === "custom" ? { ...settings, profile } : applyProfile(profile, settings));
   };
 
   const toggle =

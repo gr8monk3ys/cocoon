@@ -48,18 +48,8 @@ export function buildFeedCleanerCss(hostname: string, intensity: FeedIntensity):
 
   const effectiveSelectors = intensity === "limited" ? selectors.slice(0, 1) : selectors;
 
-  return `
-    ${effectiveSelectors.join(",")} { display: none !important; }
-    body::before {
-      content: "Cocoon: Feed filtered on this site (${intensity}).";
-      display: block;
-      padding: 12px;
-      margin: 12px;
-      border-radius: 8px;
-      font-family: system-ui, sans-serif;
-      background: #e8f0fe;
-      color: #1f1f1f;
-      max-width: 460px;
-    }
-  `;
+  // The user-facing notice is rendered as a real DOM node by the content script
+  // (see content.ts) so it is exposed to assistive tech and dismissible, rather
+  // than as inaccessible CSS `content` text on body::before.
+  return `${effectiveSelectors.join(",")} { display: none !important; }`;
 }

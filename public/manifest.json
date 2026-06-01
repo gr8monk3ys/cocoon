@@ -3,7 +3,7 @@
   "name": "Cocoon Beta",
   "description": "Privacy-first browsing support for neurodivergent and mental health needs.",
   "version": "0.2.0",
-  "permissions": ["storage", "tabs"],
+  "permissions": ["storage", "activeTab"],
   "host_permissions": [
     "https://*.x.com/*",
     "https://*.twitter.com/*",

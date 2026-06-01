@@ -23,6 +23,15 @@ import type {
   ScenarioType
 } from "../lib/types";
 
+/** Coerce a number-input value to a valid hour (0–23); empty/NaN becomes 0. */
+function clampHour(value: string): number {
+  const parsed = Math.trunc(Number(value));
+  if (!Number.isFinite(parsed)) {
+    return 0;
+  }
+  return Math.min(23, Math.max(0, parsed));
+}
+
 const SCENARIOS: Array<{ label: string; value: ScenarioType }> = [
   { label: "Focus session", value: "focus_session" },
   { label: "Low stimulation", value: "low_stimulation" },
@@ -64,7 +73,7 @@ function OptionsApp(): React.JSX.Element {
   };
 
   const onProfileChange = async (profile: CocoonProfile): Promise<void> => {
-    await update(profile === "custom" ? { ...settings, profile } : applyProfile(profile));
+    await update(profile === "custom" ? { ...settings, profile } : applyProfile(profile, settings));
   };
 
   const onFeedIntensityChange = async (feedIntensity: FeedIntensity): Promise<void> => {
@@ -247,7 +256,7 @@ function OptionsApp(): React.JSX.Element {
             min={0}
             max={23}
             value={scheduleRule.startHour}
-            onChange={(event) => setScheduleRule({ ...scheduleRule, startHour: Number(event.target.value) })}
+            onChange={(event) => setScheduleRule({ ...scheduleRule, startHour: clampHour(event.target.value) })}
             aria-label="Schedule start hour"
           />
           <input
@@ -255,7 +264,7 @@ function OptionsApp(): React.JSX.Element {
             min={0}
             max={23}
             value={scheduleRule.endHour}
-            onChange={(event) => setScheduleRule({ ...scheduleRule, endHour: Number(event.target.value) })}
+            onChange={(event) => setScheduleRule({ ...scheduleRule, endHour: clampHour(event.target.value) })}
             aria-label="Schedule end hour"
           />
           <select

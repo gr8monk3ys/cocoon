@@ -1,11 +1,12 @@
 import { buildFeedCleanerCss, supportsFeedCleaner } from "./lib/feedRules";
 import { getFeedIntensityForHost, getSettings } from "./lib/settings";
-import type { CocoonMessage, CocoonSettings } from "./lib/types";
+import type { CocoonMessage, CocoonSettings, FeedIntensity } from "./lib/types";
 
 let styleTag: HTMLStyleElement | null = null;
 let groundingOverlay: HTMLDivElement | null = null;
 let previousFocusedElement: HTMLElement | null = null;
 let currentSettings: CocoonSettings | null = null;
+let feedBanner: HTMLDivElement | null = null;
 
 function ensureStyleTag(): HTMLStyleElement {
   if (!styleTag) {
@@ -23,7 +24,12 @@ function buildCss(settings: CocoonSettings): string {
 
   if (settings.darkMode) {
     rules.push("html { filter: invert(0.93) hue-rotate(180deg); background: #121212 !important; }");
-    rules.push("img, video { filter: invert(1) hue-rotate(180deg); }");
+    // Re-invert media so photos/video/graphics keep their true colors. This is
+    // a heuristic; it covers inline background-image elements but not every
+    // CSS-painted surface.
+    rules.push(
+      'img, picture, video, canvas, svg, [style*="background-image"] { filter: invert(1) hue-rotate(180deg); }'
+    );
   }
 
   if (settings.reduceMotion) {
@@ -59,6 +65,38 @@ function closeGroundingOverlay(): void {
 function handleOverlayKeydown(event: KeyboardEvent): void {
   if (event.key === "Escape") {
     closeGroundingOverlay();
+    return;
+  }
+
+  if (event.key !== "Tab" || !groundingOverlay) {
+    return;
+  }
+
+  // Trap focus inside the modal so Tab cannot reach the page behind it.
+  const focusable = Array.from(
+    groundingOverlay.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+  );
+  if (focusable.length === 0) {
+    event.preventDefault();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const active = document.activeElement;
+  const outside = !(active instanceof HTMLElement) || !groundingOverlay.contains(active);
+
+  if (outside) {
+    event.preventDefault();
+    first.focus();
+  } else if (event.shiftKey && active === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && active === last) {
+    event.preventDefault();
+    first.focus();
   }
 }
 
@@ -115,10 +153,57 @@ function openGroundingOverlay(): void {
   closeButton?.focus();
 }
 
+function removeFeedBanner(): void {
+  feedBanner?.remove();
+  feedBanner = null;
+}
+
+function updateFeedBanner(intensity: FeedIntensity): void {
+  if (!document.body) {
+    return;
+  }
+
+  if (!feedBanner) {
+    feedBanner = document.createElement("div");
+    feedBanner.id = "cocoon-feed-banner";
+    feedBanner.setAttribute("role", "status");
+    feedBanner.style.cssText =
+      "display:flex;align-items:center;gap:12px;padding:12px;margin:12px;border-radius:8px;font-family:system-ui,sans-serif;background:#e8f0fe;color:#1f1f1f;max-width:460px;";
+
+    const text = document.createElement("span");
+    text.id = "cocoon-feed-banner-text";
+    feedBanner.appendChild(text);
+
+    const dismiss = document.createElement("button");
+    dismiss.type = "button";
+    dismiss.textContent = "Dismiss";
+    dismiss.setAttribute("aria-label", "Dismiss Cocoon feed notice");
+    dismiss.style.cssText =
+      "margin-left:auto;border:0;background:#2457ff;color:#fff;padding:4px 10px;border-radius:6px;cursor:pointer;";
+    dismiss.addEventListener("click", removeFeedBanner);
+    feedBanner.appendChild(dismiss);
+
+    document.body.prepend(feedBanner);
+  }
+
+  const text = feedBanner.querySelector("#cocoon-feed-banner-text");
+  if (text) {
+    text.textContent = `Cocoon: Feed filtered on this site (${intensity}).`;
+  }
+}
+
 function applySettings(settings: CocoonSettings): void {
   currentSettings = settings;
   const style = ensureStyleTag();
   style.textContent = buildCss(settings);
+
+  const hostname = window.location.hostname;
+  const intensity = supportsFeedCleaner(hostname) ? getFeedIntensityForHost(settings, hostname) : "full";
+  if (intensity === "full") {
+    removeFeedBanner();
+  } else {
+    updateFeedBanner(intensity);
+  }
 }
 
 chrome.runtime.onMessage.addListener((message: CocoonMessage) => {
