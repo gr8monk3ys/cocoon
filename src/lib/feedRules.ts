@@ -35,21 +35,49 @@ export function getFeedSelectors(hostname: string): string[] {
   return FEED_RULES[matchedHost] ?? [];
 }
 
-/** Builds feed-hiding CSS only when a supported hostname has known selectors. */
-export function buildFeedCleanerCss(hostname: string, intensity: FeedIntensity): string {
+/**
+ * Selectors actually hidden for a given intensity: none when "full", the first
+ * (least aggressive) selector when "limited", all of them otherwise.
+ */
+export function getEffectiveFeedSelectors(hostname: string, intensity: FeedIntensity): string[] {
   if (intensity === "full") {
-    return "";
+    return [];
   }
 
   const selectors = getFeedSelectors(hostname);
   if (selectors.length === 0) {
-    return "";
+    return [];
   }
 
-  const effectiveSelectors = intensity === "limited" ? selectors.slice(0, 1) : selectors;
+  return intensity === "limited" ? selectors.slice(0, 1) : selectors;
+}
+
+/** Builds feed-hiding CSS only when a supported hostname has known selectors. */
+export function buildFeedCleanerCss(hostname: string, intensity: FeedIntensity): string {
+  const effectiveSelectors = getEffectiveFeedSelectors(hostname, intensity);
+  if (effectiveSelectors.length === 0) {
+    return "";
+  }
 
   // The user-facing notice is rendered as a real DOM node by the content script
   // (see content.ts) so it is exposed to assistive tech and dismissible, rather
   // than as inaccessible CSS `content` text on body::before.
   return `${effectiveSelectors.join(",")} { display: none !important; }`;
+}
+
+/**
+ * Counts how many feed elements the effective selectors currently match in the
+ * given root. Used by the content script to detect selector rot (a supported
+ * site changed its markup) so it can warn the user instead of silently failing.
+ */
+export function countFeedMatches(root: ParentNode, hostname: string, intensity: FeedIntensity): number {
+  let count = 0;
+  for (const selector of getEffectiveFeedSelectors(hostname, intensity)) {
+    try {
+      count += root.querySelectorAll(selector).length;
+    } catch {
+      // Malformed selector: treat as no match rather than throwing.
+    }
+  }
+  return count;
 }

@@ -1,4 +1,4 @@
-import { buildFeedCleanerCss, supportsFeedCleaner } from "./lib/feedRules";
+import { buildFeedCleanerCss, countFeedMatches, supportsFeedCleaner } from "./lib/feedRules";
 import { getFeedIntensityForHost, getSettings } from "./lib/settings";
 import type { CocoonMessage, CocoonSettings, FeedIntensity } from "./lib/types";
 
@@ -8,6 +8,7 @@ let previousFocusedElement: HTMLElement | null = null;
 let currentSettings: CocoonSettings | null = null;
 let feedBanner: HTMLDivElement | null = null;
 let feedBannerDismissed = false;
+let feedCheckToken = 0;
 
 function ensureStyleTag(): HTMLStyleElement {
   if (!styleTag) {
@@ -159,7 +160,7 @@ function removeFeedBanner(): void {
   feedBanner = null;
 }
 
-function updateFeedBanner(intensity: FeedIntensity): void {
+function setFeedBanner(message: string): void {
   // Once dismissed, stay dismissed for the lifetime of this page (a later
   // settings save must not resurrect the banner).
   if (feedBannerDismissed || !document.body) {
@@ -194,8 +195,30 @@ function updateFeedBanner(intensity: FeedIntensity): void {
 
   const text = feedBanner.querySelector("#cocoon-feed-banner-text");
   if (text) {
-    text.textContent = `Cocoon: Feed filtered on this site (${intensity}).`;
+    text.textContent = message;
   }
+}
+
+// Detects selector rot: if the effective selectors match nothing on a supported
+// host, tell the user the layout likely changed instead of failing silently.
+// Re-checks shortly after because social SPAs render their feed asynchronously.
+function evaluateFeedBanner(hostname: string, intensity: FeedIntensity): void {
+  const token = ++feedCheckToken;
+
+  const check = (): void => {
+    if (token !== feedCheckToken) {
+      return; // superseded by a newer settings application
+    }
+    if (countFeedMatches(document, hostname, intensity) > 0) {
+      setFeedBanner(`Cocoon: Feed filtered on this site (${intensity}).`);
+    } else {
+      setFeedBanner("Cocoon: couldn't find this site's feed to filter — the page layout may have changed.");
+    }
+  };
+
+  check();
+  window.setTimeout(check, 1500);
+  window.setTimeout(check, 4000);
 }
 
 function applySettings(settings: CocoonSettings): void {
@@ -206,9 +229,10 @@ function applySettings(settings: CocoonSettings): void {
   const hostname = window.location.hostname;
   const intensity = supportsFeedCleaner(hostname) ? getFeedIntensityForHost(settings, hostname) : "full";
   if (intensity === "full") {
+    feedCheckToken++; // cancel any pending re-checks
     removeFeedBanner();
   } else {
-    updateFeedBanner(intensity);
+    evaluateFeedBanner(hostname, intensity);
   }
 }
 
