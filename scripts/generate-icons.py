@@ -9,6 +9,7 @@ the repo needs no Pillow/sharp/ImageMagick).
 Usage: python3 scripts/generate-icons.py
 Outputs: public/icons/icon-16.png, -32, -48, -128 and icon.svg
 """
+
 import math
 import os
 import struct
@@ -18,11 +19,11 @@ OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "public", "icons")
 SIZES = [16, 32, 48, 128]
 
 # Palette
-TOP = (0x63, 0x6E, 0xFA)      # periwinkle indigo
-BOTTOM = (0x33, 0xC9, 0xC0)   # calm teal
-POD = (245, 247, 255)         # near-white silk
-BAND = (0x3B, 0x4A, 0xC4)     # indigo wrap line
-BANDS = (-0.55, 0.0, 0.55)    # band centers in pod-normalized y
+TOP = (0x63, 0x6E, 0xFA)  # periwinkle indigo
+BOTTOM = (0x33, 0xC9, 0xC0)  # calm teal
+POD = (245, 247, 255)  # near-white silk
+BAND = (0x3B, 0x4A, 0xC4)  # indigo wrap line
+BANDS = (-0.55, 0.0, 0.55)  # band centers in pod-normalized y
 
 
 def write_png(path, size, pixels):
@@ -30,12 +31,16 @@ def write_png(path, size, pixels):
     stride = size * 4
     for y in range(size):
         raw.append(0)  # filter: none
-        raw.extend(pixels[y * stride:(y + 1) * stride])
+        raw.extend(pixels[y * stride : (y + 1) * stride])
     comp = zlib.compress(bytes(raw), 9)
 
     def chunk(tag, data):
         body = tag + data
-        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
+        return (
+            struct.pack(">I", len(data))
+            + body
+            + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
+        )
 
     ihdr = struct.pack(">IIBBBBB", size, size, 8, 6, 0, 0, 0)
     with open(path, "wb") as f:
@@ -66,7 +71,11 @@ def render(size):
                     # signed distance to rounded rect (<=0 means inside)
                     dx = abs(fx - cx) - (half - corner)
                     dy = abs(fy - cy) - (half - corner)
-                    dist = math.hypot(max(dx, 0.0), max(dy, 0.0)) + min(max(dx, dy), 0.0) - corner
+                    dist = (
+                        math.hypot(max(dx, 0.0), max(dy, 0.0))
+                        + min(max(dx, dy), 0.0)
+                        - corner
+                    )
                     if dist > 0.0:
                         continue
                     t = fy / size
