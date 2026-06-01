@@ -12,7 +12,7 @@ This repository includes a production-hardening pass over the MVP:
 - **Per-site feed cleaner overrides** in popup and options UIs
 - Expanded unit test coverage for settings and feed-rule behavior
 - Upgraded build/test toolchain dependencies and audit cleanup
-- User-facing privacy and support documentation (`PRIVACY.md`, `SUPPORT.md`)
+- User-facing privacy and support documentation (`docs/PRIVACY.md`, `docs/SUPPORT.md`)
 
 ## Current features
 
@@ -49,9 +49,10 @@ All settings are stored locally with `chrome.storage.local`.
 - `src/options/main.tsx` – full settings + per-site override management
 - `src/lib/settings.ts` – typed settings + per-site override helpers
 - `src/lib/feedRules.ts` – domain-scoped feed cleaning rules
-- `PRIVACY.md` – user-facing privacy policy for beta
-- `SUPPORT.md` – support workflow and safety notes
-- `PROFILE_RATIONALE.md` – profile intent and neurodivergent-fit guidance
+- `public/icons/` – extension + store icons (regenerate with `npm run icons`)
+- `docs/PRIVACY.md` – user-facing privacy policy for beta
+- `docs/SUPPORT.md` – support workflow and safety notes
+- `docs/PROFILE_RATIONALE.md` – profile intent and neurodivergent-fit guidance
 
 ## Local development
 
@@ -93,20 +94,20 @@ Before broad launch, complete:
 - [x] Automated domain consistency checks for host permissions vs feed-rule hosts (`src/lib/domainConsistency.test.ts`)
 - [x] Grounding overlay accessibility behavior is covered by automated tests (`src/content.ui.test.ts`)
 - [ ] Accessibility QA with keyboard-only and screen-reader checks
-- [x] Release/versioning automation for Chrome Web Store packaging (`npm run package:extension`, `RELEASE.md`)
+- [x] Release/versioning automation for Chrome Web Store packaging (`npm run package:extension`, `docs/RELEASE.md`)
 
 ## Release automation
 
 - Run `npm run check` for full quality gates.
 - Run `npm run package:extension` to generate a release zip in `artifacts/`.
-- Follow `RELEASE.md` for versioning and store submission steps.
+- Follow `docs/RELEASE.md` for versioning and store submission steps.
 
 
 ## Product ideation backlog
 
-- See `FEATURE_IDEAS.md` for prioritized next-step feature concepts aligned with Cocoon's privacy-first model, including adaptive profile planning for mixed and changing user contexts.
+- See `docs/FEATURE_IDEAS.md` for prioritized next-step feature concepts aligned with Cocoon's privacy-first model, including adaptive profile planning for mixed and changing user contexts.
 
 
 ## Profiles explained
 
-See `PROFILE_RATIONALE.md` for detailed guidance on ADHD, Autism, Anxiety, and Custom profile intent and tradeoffs.
+See `docs/PROFILE_RATIONALE.md` for detailed guidance on ADHD, Autism, Anxiety, and Custom profile intent and tradeoffs.
