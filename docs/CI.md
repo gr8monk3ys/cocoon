@@ -14,6 +14,7 @@ has a distinct job; overlapping/non-functional scanners were removed.
 | `org-trivy.yml` | Dependency/filesystem vulnerability scanning |
 | `org-trufflehog.yml` | Secret scanning (verified secrets) |
 | `org-release-please.yml` | Release automation on `main` |
+| `security-baseline.yml` | `npm audit` (high). Redundant with `ci.yml`'s audit, but kept because it is a **required status check** in branch protection — removing it would block all merges until branch protection is updated. |
 
 Dependency updates are automated via Dependabot (`.github/dependabot.yml`,
 github-actions + npm).
@@ -28,8 +29,10 @@ github-actions + npm).
   non-existent action path (`google/osv-scanner-action/scan-repo`), so it failed
   in seconds on every run. Dependency CVEs are covered by `npm audit` + Trivy +
   Dependabot.
-- **`security-baseline.yml`** — Ran `npm audit`, which exactly duplicated the
-  audit step already in `ci.yml`.
+
+`codeql` and `osv` are not required status checks, so removing them is safe.
+`security-baseline` IS a required check, so it is kept (despite duplicating
+`ci.yml`'s audit) until branch protection is updated to drop it.
 
 ## Possible further consolidation (not done)
 
