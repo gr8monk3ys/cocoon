@@ -161,6 +161,10 @@ function OptionsApp(): React.JSX.Element {
           />
           Dark mode
         </label>
+        <p style={{ margin: "0 0 8px 22px", fontSize: 12, color: "#555" }}>
+          Lightweight dark mode via color inversion. For full, per-site theming we recommend a dedicated
+          extension such as Dark Reader.
+        </p>
         <label style={{ display: "block", marginBottom: 8 }}>
           <input
             type="checkbox"

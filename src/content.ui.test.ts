@@ -53,6 +53,7 @@ describe("content grounding accessibility", () => {
     expect(overlay.getAttribute("role")).toBe("dialog");
     expect(overlay.getAttribute("aria-modal")).toBe("true");
     expect(document.activeElement?.id).toBe("cocoon-close");
+    expect(overlay.querySelector("#cocoon-breath-cue")?.textContent).toContain("Round 1 of 4");
 
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
 

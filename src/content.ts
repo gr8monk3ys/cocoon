@@ -4,6 +4,7 @@ import type { CocoonMessage, CocoonSettings, FeedIntensity } from "./lib/types";
 
 let styleTag: HTMLStyleElement | null = null;
 let groundingOverlay: HTMLDivElement | null = null;
+let groundingTimer: number | null = null;
 let previousFocusedElement: HTMLElement | null = null;
 let currentSettings: CocoonSettings | null = null;
 let feedBanner: HTMLDivElement | null = null;
@@ -57,6 +58,7 @@ function closeGroundingOverlay(): void {
     return;
   }
 
+  stopBreathingGuide();
   document.removeEventListener("keydown", handleOverlayKeydown);
   groundingOverlay.remove();
   groundingOverlay = null;
@@ -117,7 +119,7 @@ function createGroundingOverlay(): HTMLDivElement {
 
   panel.innerHTML = `
     <h2 id="cocoon-grounding-title" style="margin:0 0 8px;">60-second reset</h2>
-    <p style="margin:0 0 12px;line-height:1.4;">Breathe in for 4, hold for 4, breathe out for 4. Repeat 4 rounds.</p>
+    <p id="cocoon-breath-cue" aria-live="polite" style="margin:0 0 12px;line-height:1.4;font-weight:600;min-height:1.4em;">Breathe in for 4, hold for 4, breathe out for 4.</p>
     <ol style="margin:0 0 16px;padding-left:18px;line-height:1.5;">
       <li>Name 5 things you can see.</li>
       <li>Name 4 things you can feel.</li>
@@ -138,7 +140,60 @@ function createGroundingOverlay(): HTMLDivElement {
   });
 
   overlay.appendChild(panel);
+  startBreathingGuide(panel);
   return overlay;
+}
+
+const BREATH_PHASES = [
+  { label: "Breathe in", seconds: 4 },
+  { label: "Hold", seconds: 4 },
+  { label: "Breathe out", seconds: 4 }
+];
+const BREATH_ROUNDS = 4;
+
+// Text-only guided breathing: updates an aria-live cue each second. No CSS
+// animation, so it stays compatible with the reduce-motion goal.
+function startBreathingGuide(panel: HTMLElement): void {
+  const cue = panel.querySelector<HTMLElement>("#cocoon-breath-cue");
+  if (!cue) {
+    return;
+  }
+
+  let round = 1;
+  let phase = 0;
+  let remaining = BREATH_PHASES[0].seconds;
+  const render = (): void => {
+    cue.textContent = `Round ${round} of ${BREATH_ROUNDS} — ${BREATH_PHASES[phase].label} (${remaining})`;
+  };
+  render();
+
+  groundingTimer = window.setInterval(() => {
+    remaining -= 1;
+    if (remaining > 0) {
+      render();
+      return;
+    }
+
+    phase += 1;
+    if (phase >= BREATH_PHASES.length) {
+      phase = 0;
+      round += 1;
+    }
+    if (round > BREATH_ROUNDS) {
+      cue.textContent = "Nice work — take that calm with you.";
+      stopBreathingGuide();
+      return;
+    }
+    remaining = BREATH_PHASES[phase].seconds;
+    render();
+  }, 1000);
+}
+
+function stopBreathingGuide(): void {
+  if (groundingTimer !== null) {
+    window.clearInterval(groundingTimer);
+    groundingTimer = null;
+  }
 }
 
 function openGroundingOverlay(): void {

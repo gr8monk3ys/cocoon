@@ -17,9 +17,9 @@ This repository includes a production-hardening pass over the MVP:
 ## Current features
 
 1. **Profile presets**: ADHD, Autism, Anxiety, and Custom
-2. **Sensory controls**: dark mode and reduced motion
-3. **Feed cleaner**: hides algorithmic feed surfaces on supported social platforms
-4. **Grounding overlay**: quick breathing + 5-4-3-2-1 grounding flow
+2. **Sensory controls**: lightweight dark mode (color inversion; for full per-site theming we recommend Dark Reader) and reduced motion
+3. **Feed cleaner**: hides algorithmic feed surfaces on supported social platforms, and warns you if a site's layout changes so the cleaner doesn't fail silently
+4. **Grounding overlay**: a motion-free guided breathing timer + 5-4-3-2-1 grounding flow
 5. **Per-site overrides**: enable/disable feed cleaner per supported domain
 
 All settings are stored locally with `chrome.storage.local`.
@@ -106,6 +106,7 @@ Before broad launch, complete:
 ## Product ideation backlog
 
 - See `docs/FEATURE_IDEAS.md` for prioritized next-step feature concepts aligned with Cocoon's privacy-first model, including adaptive profile planning for mixed and changing user contexts.
+- See `docs/ROADMAP.md` for intentionally deferred work and the reliability watch list.
 
 
 ## Profiles explained
