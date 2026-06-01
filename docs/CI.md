@@ -13,7 +13,7 @@ has a distinct job; overlapping/non-functional scanners were removed.
 | `org-gitleaks.yml` | Secret scanning |
 | `org-trivy.yml` | Dependency/filesystem vulnerability scanning |
 | `org-trufflehog.yml` | Secret scanning (verified secrets) |
-| `org-release-please.yml` | Release automation on `main` |
+| `pages.yml` | Deploys the `docs/` privacy/support site to GitHub Pages on pushes to `main` that touch `docs/`. |
 | `security-baseline.yml` | `npm audit` (high). Redundant with `ci.yml`'s audit, but kept because it is a **required status check** in branch protection — removing it would block all merges until branch protection is updated. |
 
 Dependency updates are automated via Dependabot (`.github/dependabot.yml`,
@@ -29,10 +29,16 @@ github-actions + npm).
   non-existent action path (`google/osv-scanner-action/scan-repo`), so it failed
   in seconds on every run. Dependency CVEs are covered by `npm audit` + Trivy +
   Dependabot.
+- **`org-release-please.yml`** — `startup_failure` on every push: the reusable
+  `reusable-release-please.yml` in the private `gr8monk3ys/github` repo is
+  broken/misconfigured (not a pin issue — sibling reusable workflows at the same
+  SHA pass; `secrets: inherit` did not help). It only powers release-PR
+  automation. Versioning is handled manually via `npm run package:extension` +
+  `docs/RELEASE.md`. Re-add it once the org reusable workflow is fixed.
 
-`codeql` and `osv` are not required status checks, so removing them is safe.
-`security-baseline` IS a required check, so it is kept (despite duplicating
-`ci.yml`'s audit) until branch protection is updated to drop it.
+`codeql`, `osv`, and `release-please` are not required status checks, so removing
+them is safe. `security-baseline` IS a required check, so it is kept (despite
+duplicating `ci.yml`'s audit) until branch protection is updated to drop it.
 
 ## Possible further consolidation (not done)
 
