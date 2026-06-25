@@ -5,7 +5,10 @@ import {
   clearExpiredScenario,
   getAdaptiveProfileSuggestion,
   getFeedIntensityForHost,
+  isFeedCleanerEnabledForHost,
   normalizeHostname,
+  removeDomainRule,
+  removeScheduleRule,
   removeSiteFeedCleanerOverride,
   updateSiteFeedCleanerOverride,
   upsertDomainRule,
@@ -47,6 +50,76 @@ describe("site feed cleaner overrides", () => {
     const updated = updateSiteFeedCleanerOverride(applyProfile("adhd"), "youtube.com", false);
     const removed = removeSiteFeedCleanerOverride(updated, "youtube.com");
     expect(removed.siteFeedCleanerOverrides["youtube.com"]).toBeUndefined();
+  });
+});
+
+describe("isFeedCleanerEnabledForHost", () => {
+  it("is disabled when the effective intensity is 'full'", () => {
+    const base = { ...applyProfile("adhd"), feedIntensity: "full" as const };
+    expect(isFeedCleanerEnabledForHost(base, "youtube.com")).toBe(false);
+  });
+
+  it("is enabled when the global setting cleans the feed", () => {
+    const base = applyProfile("adhd"); // limited
+    expect(isFeedCleanerEnabledForHost(base, "youtube.com")).toBe(true);
+  });
+
+  it("reflects a per-site override that turns cleaning off", () => {
+    const base = applyProfile("adhd"); // limited globally
+    const settings = updateSiteFeedCleanerOverride(base, "reddit.com", false);
+    expect(isFeedCleanerEnabledForHost(settings, "reddit.com")).toBe(false);
+    // other hosts still follow the global setting
+    expect(isFeedCleanerEnabledForHost(settings, "youtube.com")).toBe(true);
+  });
+});
+
+describe("removeDomainRule", () => {
+  it("removes the matching domain rule and leaves others intact", () => {
+    let settings = applyProfile("adhd");
+    settings = upsertDomainRule(settings, "reddit.com", "autism");
+    settings = upsertDomainRule(settings, "youtube.com", "anxiety");
+
+    const result = removeDomainRule(settings, "reddit.com");
+
+    expect(result.adaptive.domainRules["reddit.com"]).toBeUndefined();
+    expect(result.adaptive.domainRules["youtube.com"]).toBe("anxiety");
+  });
+
+  it("normalizes the hostname before removing", () => {
+    let settings = applyProfile("adhd");
+    settings = upsertDomainRule(settings, "reddit.com", "autism");
+
+    const result = removeDomainRule(settings, "REDDIT.COM.");
+
+    expect(result.adaptive.domainRules["reddit.com"]).toBeUndefined();
+  });
+
+  it("is a no-op when the domain rule does not exist", () => {
+    const settings = applyProfile("adhd");
+    const result = removeDomainRule(settings, "example.com");
+    expect(result.adaptive.domainRules).toEqual({});
+  });
+});
+
+describe("removeScheduleRule", () => {
+  it("removes only the rule at the given index", () => {
+    let settings = applyProfile("adhd");
+    settings = upsertScheduleRule(settings, { startHour: 9, endHour: 17, profile: "autism" });
+    settings = upsertScheduleRule(settings, { startHour: 20, endHour: 23, profile: "anxiety" });
+
+    const result = removeScheduleRule(settings, 0);
+
+    expect(result.adaptive.scheduleRules).toHaveLength(1);
+    expect(result.adaptive.scheduleRules[0]).toEqual({ startHour: 20, endHour: 23, profile: "anxiety" });
+  });
+
+  it("leaves the rules unchanged when the index is out of range", () => {
+    let settings = applyProfile("adhd");
+    settings = upsertScheduleRule(settings, { startHour: 9, endHour: 17, profile: "autism" });
+
+    const result = removeScheduleRule(settings, 5);
+
+    expect(result.adaptive.scheduleRules).toHaveLength(1);
   });
 });
 
