@@ -64,6 +64,8 @@ function PopupApp(): React.JSX.Element {
       return;
     }
     const next = applyProfile(suggested, settings);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-shot
+    // auto-apply per hostname (ref-guarded above); persists + broadcasts, cannot cascade
     setSettings(next);
     void saveSettings(next).then(() => broadcastSettings(next));
   }, [settings, activeHostname]);
