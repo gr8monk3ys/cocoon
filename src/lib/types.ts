@@ -105,6 +105,5 @@ export const PROFILE_PRESETS: Record<CocoonProfile, CocoonSettings> = {
 };
 
 export type CocoonMessage =
-  | { type: "COCOON_GET_SETTINGS" }
   | { type: "COCOON_APPLY_SETTINGS"; payload: CocoonSettings }
   | { type: "COCOON_OPEN_GROUNDING" };

@@ -4,7 +4,7 @@ Use this checklist before each public release.
 
 ## Accessibility signoff (2026-02-11)
 
-This pass marks the current baseline as complete for the shipped beta scope.
+This pass marks the current baseline as complete for the shipped scope.
 
 ### Evidence used
 

@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import React, { useEffect, useState } from "react";
-import { supportsFeedCleaner } from "../lib/feedRules";
+import { SOCIAL_HOSTS, supportsFeedCleaner } from "../lib/feedRules";
 import {
   applyProfile,
   applyScenario,
@@ -22,6 +22,7 @@ import type {
   FeedIntensity,
   ScenarioType
 } from "../lib/types";
+import "../ui/theme.css";
 
 /** Coerce a number-input value to a valid hour (0–23); empty/NaN becomes 0. */
 function clampHour(value: string): number {
@@ -32,6 +33,8 @@ function clampHour(value: string): number {
   return Math.min(23, Math.max(0, parsed));
 }
 
+const SUPPORTED_DOMAINS_HINT = SOCIAL_HOSTS.join(", ");
+
 const SCENARIOS: Array<{ label: string; value: ScenarioType }> = [
   { label: "Focus session", value: "focus_session" },
   { label: "Low stimulation", value: "low_stimulation" },
@@ -39,14 +42,20 @@ const SCENARIOS: Array<{ label: string; value: ScenarioType }> = [
   { label: "Social guardrails", value: "social_guardrails" }
 ];
 
+const SCENARIO_DURATIONS = [15, 30, 60] as const;
+
 function OptionsApp(): React.JSX.Element {
   const [settings, setSettings] = useState<CocoonSettings | null>(null);
   const [saved, setSaved] = useState(false);
   const [hostnameInput, setHostnameInput] = useState("");
   const [overrideEnabled, setOverrideEnabled] = useState(true);
+  const [overrideError, setOverrideError] = useState("");
   const [domainRuleHost, setDomainRuleHost] = useState("");
   const [domainRuleProfile, setDomainRuleProfile] = useState<CocoonProfile>("adhd");
+  const [domainRuleError, setDomainRuleError] = useState("");
   const [scheduleRule, setScheduleRule] = useState<AdaptiveScheduleRule>({ startHour: 18, endHour: 23, profile: "anxiety" });
+  const [scheduleError, setScheduleError] = useState("");
+  const [scenarioMinutes, setScenarioMinutes] = useState<number>(30);
 
   useEffect(() => {
     void getSettings().then(setSettings);
@@ -62,7 +71,7 @@ function OptionsApp(): React.JSX.Element {
   }, [saved]);
 
   if (!settings) {
-    return <main style={{ padding: 24 }}>Loading settings…</main>;
+    return <main className="cocoon-app options">Loading settings…</main>;
   }
 
   const update = async (next: CocoonSettings): Promise<void> => {
@@ -80,12 +89,26 @@ function OptionsApp(): React.JSX.Element {
     await update({ ...settings, profile: "custom", feedIntensity, hideAlgorithmicFeeds: feedIntensity !== "full" });
   };
 
+  const validateSupportedHost = (raw: string): string | null => {
+    const normalized = normalizeHostname(raw);
+    if (!normalized) {
+      return null;
+    }
+    return supportsFeedCleaner(normalized) ? normalized : null;
+  };
+
   const addOverride = async (): Promise<void> => {
-    const normalized = normalizeHostname(hostnameInput);
-    if (!supportsFeedCleaner(normalized)) {
+    const normalized = validateSupportedHost(hostnameInput);
+    if (!normalized) {
+      setOverrideError(
+        hostnameInput.trim()
+          ? `“${hostnameInput.trim()}” isn't a supported domain. Supported: ${SUPPORTED_DOMAINS_HINT}.`
+          : "Enter a hostname first, e.g. reddit.com."
+      );
       return;
     }
 
+    setOverrideError("");
     const next = updateSiteFeedCleanerOverride(settings, normalized, overrideEnabled);
     await update({ ...next, profile: "custom" });
     setHostnameInput("");
@@ -97,20 +120,32 @@ function OptionsApp(): React.JSX.Element {
   };
 
   const applyScenarioNow = async (scenario: ScenarioType): Promise<void> => {
-    await update(applyScenario(settings, scenario, 30));
+    await update(applyScenario(settings, scenario, scenarioMinutes));
   };
 
   const addDomainRule = async (): Promise<void> => {
-    const normalized = normalizeHostname(domainRuleHost);
-    if (!supportsFeedCleaner(normalized)) {
+    const normalized = validateSupportedHost(domainRuleHost);
+    if (!normalized) {
+      setDomainRuleError(
+        domainRuleHost.trim()
+          ? `“${domainRuleHost.trim()}” isn't a supported domain. Supported: ${SUPPORTED_DOMAINS_HINT}.`
+          : "Enter a hostname first, e.g. reddit.com."
+      );
       return;
     }
 
+    setDomainRuleError("");
     await update({ ...upsertDomainRule(settings, normalized, domainRuleProfile), profile: "custom" });
     setDomainRuleHost("");
   };
 
   const addScheduleRule = async (): Promise<void> => {
+    if (scheduleRule.startHour === scheduleRule.endHour) {
+      setScheduleError("Start and end hour are the same, so the rule would never match. Pick two different hours (rules may wrap past midnight).");
+      return;
+    }
+
+    setScheduleError("");
     await update({ ...upsertScheduleRule(settings, scheduleRule), profile: "custom" });
   };
 
@@ -118,19 +153,19 @@ function OptionsApp(): React.JSX.Element {
   const sortedDomainRules = Object.entries(settings.adaptive.domainRules).sort(([a], [b]) => a.localeCompare(b));
 
   return (
-    <main style={{ maxWidth: 760, margin: "30px auto", fontFamily: "system-ui, sans-serif", lineHeight: 1.4 }}>
-      <h1>Cocoon Settings</h1>
-      <p>Settings are stored locally. Adaptive suggestions are user-controlled and transparent.</p>
+    <main className="cocoon-app options">
+      <header className="cocoon-header">
+        <img src="/icons/icon-48.png" alt="" width={32} height={32} />
+        <h1>Cocoon Settings</h1>
+      </header>
+      <div className="brand-rule" />
+      <p className="lede">Settings are stored locally. Adaptive suggestions are user-controlled and transparent.</p>
 
-      <section style={{ padding: 16, border: "1px solid #ddd", borderRadius: 10, marginBottom: 16 }}>
-        <h2 style={{ marginTop: 0 }}>Profile presets</h2>
-        <label style={{ display: "block", marginBottom: 8 }}>
+      <section className="card">
+        <h2>Profile presets</h2>
+        <label className="field">
           Profile
-          <select
-            value={settings.profile}
-            onChange={(event) => void onProfileChange(event.target.value as CocoonProfile)}
-            style={{ display: "block", marginTop: 4 }}
-          >
+          <select value={settings.profile} onChange={(event) => void onProfileChange(event.target.value as CocoonProfile)}>
             <option value="adhd">ADHD focus</option>
             <option value="autism">Autism sensory</option>
             <option value="anxiety">Anxiety calm</option>
@@ -139,21 +174,20 @@ function OptionsApp(): React.JSX.Element {
         </label>
       </section>
 
-      <section style={{ padding: 16, border: "1px solid #ddd", borderRadius: 10, marginBottom: 16 }}>
-        <h2 style={{ marginTop: 0 }}>Feature toggles</h2>
-        <label style={{ display: "block", marginBottom: 8 }}>
+      <section className="card">
+        <h2>Feature toggles</h2>
+        <label className="field">
           Feed intensity
           <select
             value={settings.feedIntensity}
             onChange={(event) => void onFeedIntensityChange(event.target.value as FeedIntensity)}
-            style={{ display: "block", marginTop: 4 }}
           >
             <option value="full">Full feed</option>
             <option value="limited">Limited feed</option>
             <option value="none">No feed</option>
           </select>
         </label>
-        <label style={{ display: "block", marginBottom: 8 }}>
+        <label className="checkbox-row">
           <input
             type="checkbox"
             checked={settings.darkMode}
@@ -161,11 +195,11 @@ function OptionsApp(): React.JSX.Element {
           />
           Dark mode
         </label>
-        <p style={{ margin: "0 0 8px 22px", fontSize: 12, color: "#555" }}>
-          Lightweight dark mode via color inversion. For full, per-site theming we recommend a dedicated
-          extension such as Dark Reader.
+        <p className="hint">
+          Lightweight dark mode via color inversion. For full, per-site theming we recommend a dedicated extension such
+          as Dark Reader.
         </p>
-        <label style={{ display: "block", marginBottom: 8 }}>
+        <label className="checkbox-row">
           <input
             type="checkbox"
             checked={settings.reduceMotion}
@@ -173,7 +207,7 @@ function OptionsApp(): React.JSX.Element {
           />
           Reduce motion
         </label>
-        <label style={{ display: "block", marginBottom: 8 }}>
+        <label className="checkbox-row">
           <input
             type="checkbox"
             checked={settings.enableGroundingTool}
@@ -185,20 +219,33 @@ function OptionsApp(): React.JSX.Element {
         </label>
       </section>
 
-      <section style={{ padding: 16, border: "1px solid #ddd", borderRadius: 10, marginBottom: 16 }}>
-        <h2 style={{ marginTop: 0 }}>Scenario quick-switches</h2>
-        <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(2, minmax(160px, 1fr))" }}>
+      <section className="card">
+        <h2>Scenario quick-switches</h2>
+        <label className="field">
+          Scenario length
+          <select
+            value={scenarioMinutes}
+            onChange={(event) => setScenarioMinutes(Number(event.target.value))}
+          >
+            {SCENARIO_DURATIONS.map((minutes) => (
+              <option key={minutes} value={minutes}>
+                {minutes} minutes
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="button-grid two-col">
           {SCENARIOS.map((scenario) => (
-            <button key={scenario.value} type="button" onClick={() => void applyScenarioNow(scenario.value)}>
+            <button key={scenario.value} type="button" className="btn" onClick={() => void applyScenarioNow(scenario.value)}>
               {scenario.label}
             </button>
           ))}
         </div>
       </section>
 
-      <section style={{ padding: 16, border: "1px solid #ddd", borderRadius: 10, marginBottom: 16 }}>
-        <h2 style={{ marginTop: 0 }}>Adaptive profile engine</h2>
-        <label style={{ display: "block", marginBottom: 8 }}>
+      <section className="card">
+        <h2>Adaptive profile engine</h2>
+        <label className="checkbox-row">
           <input
             type="checkbox"
             checked={settings.adaptive.enabled}
@@ -208,7 +255,7 @@ function OptionsApp(): React.JSX.Element {
           />
           Enable adaptive suggestions
         </label>
-        <label style={{ display: "block", marginBottom: 12 }}>
+        <label className="checkbox-row">
           <input
             type="checkbox"
             checked={settings.adaptive.suggestOnly}
@@ -223,8 +270,8 @@ function OptionsApp(): React.JSX.Element {
           Suggest, don’t force
         </label>
 
-        <h3 style={{ margin: "8px 0" }}>Domain rules</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 8, marginBottom: 8 }}>
+        <h3>Domain rules</h3>
+        <div className="inline-form host-row">
           <input
             type="text"
             value={domainRuleHost}
@@ -238,23 +285,28 @@ function OptionsApp(): React.JSX.Element {
             <option value="anxiety">Anxiety</option>
             <option value="custom">Custom</option>
           </select>
-          <button type="button" onClick={() => void addDomainRule()}>
+          <button type="button" className="btn btn-primary" onClick={() => void addDomainRule()}>
             Save
           </button>
         </div>
-        <ul style={{ paddingLeft: 18 }}>
+        {domainRuleError && (
+          <p className="field-error" role="alert">
+            {domainRuleError}
+          </p>
+        )}
+        <ul className="item-list">
           {sortedDomainRules.map(([hostname, profile]) => (
             <li key={hostname}>
               {hostname} → {profile}
-              <button type="button" onClick={() => void update(removeDomainRule(settings, hostname))} style={{ marginLeft: 8 }}>
+              <button type="button" className="btn btn-small" onClick={() => void update(removeDomainRule(settings, hostname))}>
                 Remove
               </button>
             </li>
           ))}
         </ul>
 
-        <h3 style={{ margin: "8px 0" }}>Schedule rules</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "90px 90px 1fr auto", gap: 8, marginBottom: 8 }}>
+        <h3>Schedule rules</h3>
+        <div className="inline-form schedule-row">
           <input
             type="number"
             min={0}
@@ -281,15 +333,20 @@ function OptionsApp(): React.JSX.Element {
             <option value="anxiety">Anxiety</option>
             <option value="custom">Custom</option>
           </select>
-          <button type="button" onClick={() => void addScheduleRule()}>
+          <button type="button" className="btn btn-primary" onClick={() => void addScheduleRule()}>
             Add
           </button>
         </div>
-        <ul style={{ paddingLeft: 18 }}>
+        {scheduleError && (
+          <p className="field-error" role="alert">
+            {scheduleError}
+          </p>
+        )}
+        <ul className="item-list">
           {settings.adaptive.scheduleRules.map((rule, index) => (
             <li key={`${rule.profile}-${index}`}>
               {rule.startHour}:00-{rule.endHour}:00 → {rule.profile}
-              <button type="button" onClick={() => void update(removeScheduleRule(settings, index))} style={{ marginLeft: 8 }}>
+              <button type="button" className="btn btn-small" onClick={() => void update(removeScheduleRule(settings, index))}>
                 Remove
               </button>
             </li>
@@ -297,11 +354,11 @@ function OptionsApp(): React.JSX.Element {
         </ul>
       </section>
 
-      <section style={{ padding: 16, border: "1px solid #ddd", borderRadius: 10 }}>
-        <h2 style={{ marginTop: 0 }}>Per-site feed cleaner overrides</h2>
-        <p style={{ marginTop: 0 }}>Supported domains: x/twitter, facebook/instagram, youtube, reddit, tiktok.</p>
+      <section className="card">
+        <h2>Per-site feed cleaner overrides</h2>
+        <p className="site-line">Supported domains: x/twitter, facebook/instagram, youtube, reddit, tiktok.</p>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 8, marginBottom: 12 }}>
+        <div className="inline-form host-row">
           <input
             type="text"
             value={hostnameInput}
@@ -309,23 +366,28 @@ function OptionsApp(): React.JSX.Element {
             placeholder="e.g. reddit.com"
             aria-label="Hostname"
           />
-          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <label className="checkbox-row" style={{ marginBottom: 0 }}>
             <input type="checkbox" checked={overrideEnabled} onChange={() => setOverrideEnabled((value) => !value)} />
             Enable
           </label>
-          <button type="button" onClick={() => void addOverride()}>
+          <button type="button" className="btn btn-primary" onClick={() => void addOverride()}>
             Save
           </button>
         </div>
+        {overrideError && (
+          <p className="field-error" role="alert">
+            {overrideError}
+          </p>
+        )}
 
         {sortedOverrides.length === 0 ? (
-          <p style={{ marginBottom: 0 }}>No per-site overrides yet.</p>
+          <p className="empty-note">No per-site overrides yet.</p>
         ) : (
-          <ul style={{ paddingLeft: 18, marginBottom: 0 }}>
+          <ul className="item-list">
             {sortedOverrides.map(([hostname, enabled]) => (
-              <li key={hostname} style={{ marginBottom: 8 }}>
+              <li key={hostname}>
                 <strong>{hostname}</strong>: {enabled ? "Enabled" : "Disabled"}
-                <button type="button" onClick={() => void removeOverride(hostname)} style={{ marginLeft: 8 }}>
+                <button type="button" className="btn btn-small" onClick={() => void removeOverride(hostname)}>
                   Remove
                 </button>
               </li>
@@ -334,7 +396,7 @@ function OptionsApp(): React.JSX.Element {
         )}
       </section>
 
-      {saved && <p style={{ color: "#0d7a30" }}>Saved.</p>}
+      {saved && <p className="save-toast">Saved.</p>}
     </main>
   );
 }

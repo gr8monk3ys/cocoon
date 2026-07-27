@@ -7,7 +7,7 @@ has a distinct job; overlapping/non-functional scanners were removed.
 
 | Workflow | Purpose |
 | --- | --- |
-| `ci.yml` (`quality`) | Lint + test + build + `npm audit` — the primary gate |
+| `ci.yml` (`quality`) | Lint + test + build + `npm audit --omit=dev` (blocking) and a full-tree audit (informational) — the primary gate. Production deps block; dev-only transitives are surfaced but can't red the gate. |
 | `org-precommit.yml` | pre-commit hooks (ruff format/lint, etc.) |
 | `semgrep.yml` | SAST (public rule packs, no token needed) |
 | `org-gitleaks.yml` | Secret scanning |

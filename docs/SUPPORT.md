@@ -11,7 +11,7 @@ When filing a bug, include:
 5. Steps to reproduce
 6. Expected vs actual behavior
 
-## Known beta limitations
+## Known limitations
 
 - Social platform DOM changes may break feed selectors until rules are updated.
 - Per-site overrides currently apply only to supported social domains.

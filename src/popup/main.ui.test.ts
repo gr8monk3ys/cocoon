@@ -46,7 +46,7 @@ describe("popup ui flows", () => {
   it("renders active site and supports current-site toggle", async () => {
     await import("./main");
 
-    expect(await screen.findByText("Cocoon Beta")).toBeTruthy();
+    expect(await screen.findByText("Cocoon")).toBeTruthy();
     expect(await screen.findByText("Site: reddit.com")).toBeTruthy();
 
     const checkbox = (await screen.findByRole("checkbox", {
@@ -59,7 +59,7 @@ describe("popup ui flows", () => {
 
   it("has no obvious accessibility violations", async () => {
     await import("./main");
-    await screen.findByText("Cocoon Beta");
+    await screen.findByText("Cocoon");
 
     const result = await axe(document.body);
     expect(result.violations).toHaveLength(0);
