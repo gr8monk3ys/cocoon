@@ -23,12 +23,18 @@ SIZES = [16, 32, 48, 128]
 # 512 is site/store-only, so it is not written into public/icons.
 SITE_SIZES = [128, 512]
 
-# Palette
+# Palette (the brand anchors documented in docs/BRAND.md)
 TOP = (0x63, 0x6E, 0xFA)  # periwinkle indigo
 BOTTOM = (0x33, 0xC9, 0xC0)  # calm teal
 POD = (245, 247, 255)  # near-white silk
-BAND = (0x3B, 0x4A, 0xC4)  # indigo wrap line
-BANDS = (-0.55, 0.0, 0.55)  # band centers in pod-normalized y
+BAND = (0x3B, 0x4A, 0xC4)  # indigo wrap thread
+# Silk threads curve around the pod instead of crossing it as straight lines:
+# each band's center dips toward the viewer at the pod's midline, which reads
+# as thread wrapped around a 3D form. Centers are in pod-normalized y, shifted
+# up slightly so the curved bands stay visually balanced.
+BANDS = (-0.61, -0.06, 0.49)  # band endpoint heights in pod-normalized y
+BAND_DIP = 0.12  # extra dip at the pod's horizontal center
+BAND_HALF_WIDTH = 0.06  # half-thickness of a band in pod-normalized y
 
 
 def write_png(path, size, pixels):
@@ -92,7 +98,10 @@ def render(size):
                     if ex * ex + ey * ey <= 1.0:
                         r, g, b = POD
                         yy = (fy - cy) / pod_ry
-                        if any(abs(yy - ly) < 0.07 for ly in BANDS):
+                        curve = BAND_DIP * (1.0 - ex * ex)
+                        if any(
+                            abs(yy - (ly + curve)) < BAND_HALF_WIDTH for ly in BANDS
+                        ):
                             r = r * 0.5 + BAND[0] * 0.5
                             g = g * 0.5 + BAND[1] * 0.5
                             b = b * 0.5 + BAND[2] * 0.5
@@ -111,21 +120,25 @@ def render(size):
     return px
 
 
+# Vector master of the icon. The band paths mirror the raster renderer: each
+# silk thread dips BAND_DIP toward the pod's center (quadratic control point =
+# 2*midpoint - endpoint), clipped to the pod ellipse.
 SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#636EFA"/>
       <stop offset="1" stop-color="#33C9C0"/>
     </linearGradient>
+    <clipPath id="pod">
+      <ellipse cx="64" cy="64" rx="27.5" ry="42"/>
+    </clipPath>
   </defs>
   <rect x="4" y="4" width="120" height="120" rx="34" fill="url(#g)"/>
-  <g>
-    <ellipse cx="64" cy="64" rx="27.5" ry="42" fill="#F5F7FF"/>
-    <g stroke="#3B4AC4" stroke-width="3.4" stroke-linecap="round" opacity="0.85">
-      <line x1="41" y1="41" x2="87" y2="41"/>
-      <line x1="37" y1="64" x2="91" y2="64"/>
-      <line x1="41" y1="87" x2="87" y2="87"/>
-    </g>
+  <ellipse cx="64" cy="64" rx="27.5" ry="42" fill="#F5F7FF"/>
+  <g clip-path="url(#pod)" fill="none" stroke="#3B4AC4" stroke-width="5" opacity="0.9">
+    <path d="M34 38.4 Q64 48.4 94 38.4"/>
+    <path d="M34 61.5 Q64 71.5 94 61.5"/>
+    <path d="M34 84.6 Q64 94.6 94 84.6"/>
   </g>
 </svg>
 """
@@ -138,11 +151,14 @@ def main():
         rendered[size] = render(size)
         write_png(os.path.join(OUT_DIR, f"icon-{size}.png"), size, rendered[size])
         print(f"wrote icon-{size}.png")
-    with open(os.path.join(OUT_DIR, "icon.svg"), "w") as f:
-        f.write(SVG)
-    print("wrote icon.svg")
 
+    # The SVG master lives with the site assets (not public/) so it is not
+    # copied into dist/ — the manifest only references the PNG sizes.
     os.makedirs(DOCS_ASSETS, exist_ok=True)
+    with open(os.path.join(DOCS_ASSETS, "icon.svg"), "w") as f:
+        f.write(SVG)
+    print("wrote docs/assets/icon.svg")
+
     for size in SITE_SIZES:
         px = rendered.get(size) or render(size)
         write_png(os.path.join(DOCS_ASSETS, f"icon-{size}.png"), size, px)

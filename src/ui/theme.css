@@ -1,0 +1,293 @@
+/*
+ * Cocoon brand theme — shared by the popup and options pages.
+ *
+ * Palette anchors match the app icon: periwinkle indigo (#636EFA) fading to
+ * calm teal (#33C9C0), deep indigo (#3B4AC4) for actions, silk near-white
+ * surfaces. Motion is intentionally absent: no transitions or animations,
+ * consistent with the reduce-motion goal of the product.
+ */
+
+:root {
+  --cocoon-ink: #20264a;
+  --cocoon-muted: #5a6180;
+  --cocoon-bg: #f4f5fc;
+  --cocoon-surface: #ffffff;
+  --cocoon-border: #dcdff0;
+  --cocoon-primary: #3b4ac4;
+  --cocoon-primary-soft: #eef1fe;
+  --cocoon-primary-soft-border: #c7cdf4;
+  --cocoon-focus: #636efa;
+  --cocoon-teal-ink: #17706b;
+  --cocoon-error: #a3333d;
+  --cocoon-error-soft: #fdeef0;
+  --cocoon-btn-bg: #3b4ac4;
+  --cocoon-btn-bg-hover: #333fa8;
+  --cocoon-btn-ink: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cocoon-ink: #e7e9f8;
+    --cocoon-muted: #a3a9c9;
+    --cocoon-bg: #171a2f;
+    --cocoon-surface: #20243d;
+    --cocoon-border: #343a5c;
+    --cocoon-primary: #8d96ff;
+    --cocoon-primary-soft: #272c4d;
+    --cocoon-primary-soft-border: #3d4470;
+    --cocoon-focus: #8d96ff;
+    --cocoon-teal-ink: #5fd6cd;
+    --cocoon-error: #ff97a0;
+    --cocoon-error-soft: #3d2233;
+    --cocoon-btn-bg: #8d96ff;
+    --cocoon-btn-bg-hover: #a4abff;
+    --cocoon-btn-ink: #171a2f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--cocoon-bg);
+  color: var(--cocoon-ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cocoon-focus);
+  outline-offset: 2px;
+}
+
+.cocoon-app.popup {
+  width: 340px;
+  padding: 14px 16px 16px;
+}
+
+.cocoon-app.options {
+  max-width: 760px;
+  margin: 32px auto 48px;
+  padding: 0 16px;
+}
+
+.cocoon-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.cocoon-header img {
+  border-radius: 6px;
+}
+
+.cocoon-header h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.cocoon-app.options .cocoon-header h1 {
+  font-size: 24px;
+}
+
+/* The one decorative brand touch: a static indigo→teal silk thread. */
+.brand-rule {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #636efa, #33c9c0);
+  margin: 8px 0 14px;
+}
+
+.lede {
+  margin: 0 0 14px;
+  color: var(--cocoon-muted);
+}
+
+.card {
+  background: var(--cocoon-surface);
+  border: 1px solid var(--cocoon-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.card h2 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.card h3 {
+  margin: 12px 0 8px;
+  font-size: 13.5px;
+}
+
+.field {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.field select,
+.field input[type="text"],
+.field input[type="number"] {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 9px;
+  font: inherit;
+  font-weight: 400;
+  color: var(--cocoon-ink);
+  background: var(--cocoon-surface);
+  border: 1px solid var(--cocoon-border);
+  border-radius: 8px;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  font: inherit;
+  color: var(--cocoon-ink);
+  background: var(--cocoon-surface);
+  border: 1px solid var(--cocoon-border);
+  border-radius: 8px;
+  padding: 6px 9px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--cocoon-primary);
+}
+
+.hint {
+  margin: 2px 0 10px 23px;
+  font-size: 12px;
+  color: var(--cocoon-muted);
+}
+
+button {
+  font: inherit;
+}
+
+.btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  background: var(--cocoon-primary-soft);
+  border: 1px solid var(--cocoon-primary-soft-border);
+  color: var(--cocoon-ink);
+}
+
+.btn:hover {
+  background: var(--cocoon-border);
+}
+
+.btn-primary {
+  background: var(--cocoon-btn-bg);
+  border-color: var(--cocoon-btn-bg);
+  color: var(--cocoon-btn-ink);
+}
+
+.btn-primary:hover {
+  background: var(--cocoon-btn-bg-hover);
+  border-color: var(--cocoon-btn-bg-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.btn-small {
+  padding: 3px 10px;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.button-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.button-grid.two-col {
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+}
+
+.inline-form {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.inline-form.host-row {
+  grid-template-columns: 1fr auto auto;
+}
+
+.inline-form.schedule-row {
+  grid-template-columns: 80px 80px 1fr auto;
+}
+
+.field-error {
+  margin: 6px 0 8px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--cocoon-error);
+  background: var(--cocoon-error-soft);
+}
+
+.item-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.item-list li {
+  margin-bottom: 6px;
+}
+
+.suggestion {
+  padding: 10px 12px;
+  border: 1px solid var(--cocoon-primary-soft-border);
+  background: var(--cocoon-primary-soft);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.save-toast {
+  margin: 8px 0 0;
+  font-weight: 600;
+  color: var(--cocoon-teal-ink);
+}
+
+.empty-note {
+  margin: 0;
+  color: var(--cocoon-muted);
+}
+
+.site-line {
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  color: var(--cocoon-muted);
+}

@@ -1,11 +1,29 @@
+/* Cocoon site theme — tokens mirror src/ui/theme.css and docs/BRAND.md. */
+
 :root {
-  --bg0: #f7f3ea;
-  --bg1: #ffffff;
-  --ink: #0a2124;
-  --muted: #294548;
-  --border: rgba(10, 33, 36, 0.12);
-  --accent: #1f6f68;
-  --accent-ink: #083033;
+  --ink: #20264a;
+  --muted: #5a6180;
+  --bg: #f4f5fc;
+  --surface: #ffffff;
+  --border: #dcdff0;
+  --accent: #3b4ac4;
+  --accent-soft: #eef1fe;
+  --accent-soft-border: #c7cdf4;
+  --grad-a: #636efa;
+  --grad-b: #33c9c0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e7e9f8;
+    --muted: #a3a9c9;
+    --bg: #171a2f;
+    --surface: #20243d;
+    --border: #343a5c;
+    --accent: #8d96ff;
+    --accent-soft: #272c4d;
+    --accent-soft-border: #3d4470;
+  }
 }
 
 * {
@@ -20,11 +38,13 @@ body {
 body {
   margin: 0;
   color: var(--ink);
-  background: radial-gradient(1200px 700px at 20% -10%, rgba(31, 111, 104, 0.14), transparent 60%),
-    radial-gradient(900px 600px at 90% 10%, rgba(31, 111, 104, 0.10), transparent 55%),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  line-height: 1.5;
+  background:
+    radial-gradient(1200px 700px at 15% -10%, rgba(99, 110, 250, 0.12), transparent 60%),
+    radial-gradient(900px 600px at 95% 5%, rgba(51, 201, 192, 0.10), transparent 55%),
+    var(--bg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
 }
 
 main {
@@ -37,23 +57,32 @@ header {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 header img {
   width: 56px;
   height: 56px;
+  border-radius: 14px;
 }
 
 h1 {
   margin: 0;
   font-size: 28px;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 .subtitle {
   margin: 4px 0 0;
   color: var(--muted);
+}
+
+/* The brand's one expressive element: a silk-thread divider. */
+.brand-rule {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--grad-a), var(--grad-b));
+  margin: 14px 0 18px;
 }
 
 nav {
@@ -73,15 +102,18 @@ a:hover {
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 18px 18px 8px;
-  backdrop-filter: blur(8px);
+  padding: 18px 18px 10px;
 }
 
 .card + .card {
   margin-top: 14px;
+}
+
+.card h2 {
+  margin-top: 0;
 }
 
 .meta {
@@ -90,8 +122,8 @@ a:hover {
 }
 
 code {
-  background: rgba(31, 111, 104, 0.08);
-  border: 1px solid rgba(31, 111, 104, 0.18);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-soft-border);
   padding: 0 6px;
   border-radius: 6px;
   font-size: 0.95em;
@@ -106,10 +138,35 @@ ol {
   display: inline-flex;
   gap: 8px;
   align-items: center;
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(31, 111, 104, 0.10);
-  border: 1px solid rgba(31, 111, 104, 0.20);
-  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-soft-border);
+  color: var(--ink);
   font-size: 13px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 4px 0 10px;
+}
+
+.feature {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-soft-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.feature h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.feature p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
 }

@@ -8,8 +8,44 @@ let groundingTimer: number | null = null;
 let previousFocusedElement: HTMLElement | null = null;
 let currentSettings: CocoonSettings | null = null;
 let feedBanner: HTMLDivElement | null = null;
+let feedBannerKind: BannerKind | null = null;
 let feedBannerDismissed = false;
 let feedCheckToken = 0;
+
+/**
+ * Per-host banner history, persisted separately from settings so the
+ * confirmation banner shows once per host ever and a dismissed rot warning
+ * stays dismissed across page loads. For a calm-focused extension, a banner
+ * that reappears on every navigation is itself a stressor.
+ */
+const BANNER_STATE_KEY = "bannerState";
+
+type BannerKind = "filtered" | "rot";
+
+interface HostBannerState {
+  filteredShownAt?: number;
+  rotDismissedAt?: number;
+}
+
+async function readBannerState(): Promise<Record<string, HostBannerState>> {
+  try {
+    const result = await chrome.storage.local.get(BANNER_STATE_KEY);
+    const raw = result[BANNER_STATE_KEY];
+    return raw && typeof raw === "object" ? (raw as Record<string, HostBannerState>) : {};
+  } catch {
+    return {};
+  }
+}
+
+async function markBannerState(hostname: string, patch: HostBannerState): Promise<void> {
+  const state = await readBannerState();
+  const next = { ...state, [hostname]: { ...state[hostname], ...patch } };
+  try {
+    await chrome.storage.local.set({ [BANNER_STATE_KEY]: next });
+  } catch {
+    // Storage unavailable: banner history just won't persist this time.
+  }
+}
 
 function ensureStyleTag(): HTMLStyleElement {
   if (!styleTag) {
@@ -111,15 +147,16 @@ function createGroundingOverlay(): HTMLDivElement {
   overlay.setAttribute("aria-modal", "true");
   overlay.setAttribute("aria-labelledby", "cocoon-grounding-title");
   overlay.style.cssText =
-    "position:fixed;inset:0;z-index:2147483647;background:rgba(10,10,10,0.6);display:flex;align-items:center;justify-content:center;";
+    "position:fixed;inset:0;z-index:2147483647;background:rgba(23,26,47,0.55);display:flex;align-items:center;justify-content:center;";
 
   const panel = document.createElement("div");
   panel.style.cssText =
-    "max-width:420px;background:#fff;padding:20px;border-radius:10px;font-family:system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,0.2);";
+    "max-width:420px;background:#fdfdff;color:#20264a;padding:24px;border-radius:14px;" +
+    "font-family:system-ui,sans-serif;box-shadow:0 18px 50px rgba(23,26,47,0.35);border:1px solid #e3e6f7;";
 
   panel.innerHTML = `
-    <h2 id="cocoon-grounding-title" style="margin:0 0 8px;">60-second reset</h2>
-    <p id="cocoon-breath-cue" aria-live="polite" style="margin:0 0 12px;line-height:1.4;font-weight:600;min-height:1.4em;">Breathe in for 4, hold for 4, breathe out for 4.</p>
+    <h2 id="cocoon-grounding-title" style="margin:0 0 8px;font-size:20px;color:#20264a;">60-second reset</h2>
+    <p id="cocoon-breath-cue" aria-live="polite" style="margin:0 0 12px;line-height:1.4;font-weight:600;min-height:1.4em;color:#3b4ac4;">Breathe in for 4, hold for 4, breathe out for 4.</p>
     <ol style="margin:0 0 16px;padding-left:18px;line-height:1.5;">
       <li>Name 5 things you can see.</li>
       <li>Name 4 things you can feel.</li>
@@ -127,7 +164,7 @@ function createGroundingOverlay(): HTMLDivElement {
       <li>Name 2 things you can smell.</li>
       <li>Name 1 thing you can taste.</li>
     </ol>
-    <button id="cocoon-close" type="button" style="border:0;background:#2457ff;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;">Continue browsing</button>
+    <button id="cocoon-close" type="button" style="border:0;background:#3b4ac4;color:#fff;padding:9px 16px;border-radius:999px;cursor:pointer;font-size:14px;">Continue browsing</button>
   `;
 
   const closeButton = panel.querySelector<HTMLButtonElement>("#cocoon-close");
@@ -213,9 +250,10 @@ function openGroundingOverlay(): void {
 function removeFeedBanner(): void {
   feedBanner?.remove();
   feedBanner = null;
+  feedBannerKind = null;
 }
 
-function setFeedBanner(message: string): void {
+function setFeedBanner(message: string, kind: BannerKind): void {
   // Once dismissed, stay dismissed for the lifetime of this page (a later
   // settings save must not resurrect the banner).
   if (feedBannerDismissed || !document.body) {
@@ -227,7 +265,9 @@ function setFeedBanner(message: string): void {
     feedBanner.id = "cocoon-feed-banner";
     feedBanner.setAttribute("role", "status");
     feedBanner.style.cssText =
-      "display:flex;align-items:center;gap:12px;padding:12px;margin:12px;border-radius:8px;font-family:system-ui,sans-serif;background:#e8f0fe;color:#1f1f1f;max-width:460px;";
+      "display:flex;align-items:center;gap:12px;padding:12px 14px;margin:12px;border-radius:10px;" +
+      "font-family:system-ui,sans-serif;font-size:14px;background:#eef1fe;color:#20264a;" +
+      "border:1px solid #c7cdf4;box-shadow:0 2px 8px rgba(32,38,74,0.08);max-width:460px;";
 
     const text = document.createElement("span");
     text.id = "cocoon-feed-banner-text";
@@ -238,9 +278,13 @@ function setFeedBanner(message: string): void {
     dismiss.textContent = "Dismiss";
     dismiss.setAttribute("aria-label", "Dismiss Cocoon feed notice");
     dismiss.style.cssText =
-      "margin-left:auto;border:0;background:#2457ff;color:#fff;padding:4px 10px;border-radius:6px;cursor:pointer;";
+      "margin-left:auto;border:0;background:#3b4ac4;color:#fff;padding:5px 12px;border-radius:999px;cursor:pointer;font-size:13px;";
     dismiss.addEventListener("click", () => {
       feedBannerDismissed = true;
+      // A dismissed rot warning stays dismissed on future visits to this host.
+      if (feedBannerKind === "rot") {
+        void markBannerState(window.location.hostname, { rotDismissedAt: Date.now() });
+      }
       removeFeedBanner();
     });
     feedBanner.appendChild(dismiss);
@@ -248,6 +292,7 @@ function setFeedBanner(message: string): void {
     document.body.prepend(feedBanner);
   }
 
+  feedBannerKind = kind;
   const text = feedBanner.querySelector("#cocoon-feed-banner-text");
   if (text) {
     text.textContent = message;
@@ -257,23 +302,43 @@ function setFeedBanner(message: string): void {
 // Detects selector rot: if the effective selectors match nothing on a supported
 // host, tell the user the layout likely changed instead of failing silently.
 // Re-checks shortly after because social SPAs render their feed asynchronously.
+// Persistence rules: the "feed filtered" confirmation shows once per host ever;
+// the rot warning shows until the user dismisses it, then stays dismissed.
 function evaluateFeedBanner(hostname: string, intensity: FeedIntensity): void {
   const token = ++feedCheckToken;
 
-  const check = (): void => {
+  const check = async (): Promise<void> => {
     if (token !== feedCheckToken) {
       return; // superseded by a newer settings application
     }
-    if (countFeedMatches(document, hostname, intensity) > 0) {
-      setFeedBanner(`Cocoon: Feed filtered on this site (${intensity}).`);
-    } else {
-      setFeedBanner("Cocoon: couldn't find this site's feed to filter — the page layout may have changed.");
+    const matched = countFeedMatches(document, hostname, intensity) > 0;
+    const state = (await readBannerState())[hostname] ?? {};
+    if (token !== feedCheckToken) {
+      return; // settings changed while we read storage
+    }
+
+    if (matched) {
+      if (!state.filteredShownAt) {
+        setFeedBanner(`Cocoon: feed filtered on this site (${intensity}).`, "filtered");
+        void markBannerState(hostname, { filteredShownAt: Date.now() });
+      } else if (feedBannerKind === "rot") {
+        // A late-rendering feed was found after an early rot warning: clear it.
+        removeFeedBanner();
+      }
+      return;
+    }
+
+    if (!state.rotDismissedAt) {
+      setFeedBanner(
+        "Cocoon: couldn't find this site's feed to filter — the page layout may have changed.",
+        "rot"
+      );
     }
   };
 
-  check();
-  window.setTimeout(check, 1500);
-  window.setTimeout(check, 4000);
+  void check();
+  window.setTimeout(() => void check(), 1500);
+  window.setTimeout(() => void check(), 4000);
 }
 
 function applySettings(settings: CocoonSettings): void {

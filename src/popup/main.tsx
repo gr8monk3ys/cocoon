@@ -14,6 +14,7 @@ import {
 } from "../lib/settings";
 import { broadcastSettings, openGroundingInActiveTab } from "../lib/messages";
 import type { CocoonProfile, CocoonSettings, FeedIntensity, ScenarioType } from "../lib/types";
+import "../ui/theme.css";
 
 async function getActiveHostname(): Promise<string | null> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -35,9 +36,12 @@ const SCENARIOS: Array<{ label: string; value: ScenarioType }> = [
   { label: "Social guardrails", value: "social_guardrails" }
 ];
 
+const SCENARIO_DURATIONS = [15, 30, 60] as const;
+
 function PopupApp(): React.JSX.Element {
   const [settings, setSettings] = useState<CocoonSettings | null>(null);
   const [activeHostname, setActiveHostname] = useState<string | null>(null);
+  const [scenarioMinutes, setScenarioMinutes] = useState<number>(30);
 
   useEffect(() => {
     void getSettings().then(setSettings);
@@ -70,7 +74,7 @@ function PopupApp(): React.JSX.Element {
   }, [settings, activeHostname]);
 
   if (!settings) {
-    return <main style={{ width: 340, padding: 16 }}>Loading…</main>;
+    return <main className="cocoon-app popup">Loading…</main>;
   }
 
   const update = async (next: CocoonSettings): Promise<void> => {
@@ -94,7 +98,7 @@ function PopupApp(): React.JSX.Element {
   };
 
   const applyScenarioNow = async (scenario: ScenarioType): Promise<void> => {
-    await update(applyScenario(settings, scenario, 30));
+    await update(applyScenario(settings, scenario, scenarioMinutes));
   };
 
   const toggleCurrentSite = async (): Promise<void> => {
@@ -121,16 +125,16 @@ function PopupApp(): React.JSX.Element {
   const suggestion = activeHostname ? getAdaptiveProfileSuggestion(settings, activeHostname) : null;
 
   return (
-    <main style={{ width: 340, padding: 16, fontFamily: "system-ui, sans-serif" }}>
-      <h1 style={{ fontSize: 20, margin: "0 0 12px" }}>Cocoon Beta</h1>
+    <main className="cocoon-app popup">
+      <header className="cocoon-header">
+        <img src="/icons/icon-48.png" alt="" width={24} height={24} />
+        <h1>Cocoon</h1>
+      </header>
+      <div className="brand-rule" />
 
-      <label style={{ display: "block", marginBottom: 10 }}>
+      <label className="field">
         Profile
-        <select
-          value={settings.profile}
-          onChange={(event) => void setProfile(event.target.value as CocoonProfile)}
-          style={{ display: "block", width: "100%", marginTop: 4 }}
-        >
+        <select value={settings.profile} onChange={(event) => void setProfile(event.target.value as CocoonProfile)}>
           <option value="adhd">ADHD</option>
           <option value="autism">Autism</option>
           <option value="anxiety">Anxiety</option>
@@ -139,34 +143,30 @@ function PopupApp(): React.JSX.Element {
       </label>
 
       {suggestion && suggestion !== settings.profile && (
-        <div style={{ padding: 10, border: "1px solid #ddd", borderRadius: 8, marginBottom: 10, fontSize: 13 }}>
+        <div className="suggestion">
           Suggested profile for this context: <strong>{suggestion}</strong>
-          <button type="button" onClick={() => void setProfile(suggestion)} style={{ display: "block", marginTop: 6 }}>
+          <button type="button" className="btn btn-primary btn-block" style={{ marginTop: 6 }} onClick={() => void setProfile(suggestion)}>
             Apply suggestion
           </button>
         </div>
       )}
 
-      <label style={{ display: "block", marginBottom: 8 }}>
+      <label className="field">
         Feed intensity
-        <select
-          value={settings.feedIntensity}
-          onChange={(event) => void updateIntensity(event.target.value as FeedIntensity)}
-          style={{ display: "block", width: "100%", marginTop: 4 }}
-        >
+        <select value={settings.feedIntensity} onChange={(event) => void updateIntensity(event.target.value as FeedIntensity)}>
           <option value="full">Full</option>
           <option value="limited">Limited</option>
           <option value="none">None</option>
         </select>
       </label>
 
-      <label style={{ display: "block", marginBottom: 8 }}>
+      <label className="checkbox-row">
         <input type="checkbox" checked={settings.darkMode} onChange={() => void toggle("darkMode")()} /> Dark mode
       </label>
-      <label style={{ display: "block", marginBottom: 8 }}>
+      <label className="checkbox-row">
         <input type="checkbox" checked={settings.reduceMotion} onChange={() => void toggle("reduceMotion")()} /> Reduce motion
       </label>
-      <label style={{ display: "block", marginBottom: 12 }}>
+      <label className="checkbox-row">
         <input
           type="checkbox"
           checked={settings.enableGroundingTool}
@@ -175,46 +175,56 @@ function PopupApp(): React.JSX.Element {
         Enable grounding overlay
       </label>
 
-      <section style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd", marginBottom: 12 }}>
-        <h2 style={{ margin: "0 0 8px", fontSize: 14 }}>Scenario quick-switches</h2>
-        <div style={{ display: "grid", gap: 6 }}>
+      <section className="card">
+        <h2>Scenario quick-switches</h2>
+        <label className="field">
+          Scenario length
+          <select value={scenarioMinutes} onChange={(event) => setScenarioMinutes(Number(event.target.value))}>
+            {SCENARIO_DURATIONS.map((minutes) => (
+              <option key={minutes} value={minutes}>
+                {minutes} minutes
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="button-grid">
           {SCENARIOS.map((scenario) => (
-            <button key={scenario.value} type="button" onClick={() => void applyScenarioNow(scenario.value)}>
+            <button key={scenario.value} type="button" className="btn" onClick={() => void applyScenarioNow(scenario.value)}>
               {scenario.label}
             </button>
           ))}
         </div>
       </section>
 
-      <section style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd", marginBottom: 12 }}>
-        <h2 style={{ margin: "0 0 8px", fontSize: 14 }}>Current site override</h2>
-        <p style={{ margin: "0 0 8px", fontSize: 12 }}>
-          {activeHostname ? `Site: ${activeHostname}` : "No active website detected."}
-        </p>
+      <section className="card">
+        <h2>Current site override</h2>
+        <p className="site-line">{activeHostname ? `Site: ${activeHostname}` : "No active website detected."}</p>
         {activeSiteSupported ? (
           <>
-            <label style={{ display: "block", marginBottom: 8, fontSize: 13 }}>
+            <label className="checkbox-row">
               <input type="checkbox" checked={currentSiteIntensity !== "full"} onChange={() => void toggleCurrentSite()} />
               Enable feed cleaner on this site
             </label>
-            <button type="button" onClick={() => void resetCurrentSite()} style={{ width: "100%", padding: "6px 8px" }}>
+            <button type="button" className="btn btn-block" onClick={() => void resetCurrentSite()}>
               Reset to global default
             </button>
           </>
         ) : (
-          <p style={{ margin: 0, fontSize: 12 }}>Per-site feed overrides are only available on supported social domains.</p>
+          <p className="site-line" style={{ marginBottom: 0 }}>
+            Per-site feed overrides are only available on supported social domains.
+          </p>
         )}
       </section>
 
       <button
         type="button"
+        className="btn btn-primary btn-block"
         onClick={() => void openGroundingInActiveTab()}
         disabled={!settings.enableGroundingTool}
-        style={{ width: "100%", padding: "8px 10px", marginBottom: 8 }}
       >
         Open grounding tool
       </button>
-      <button type="button" onClick={() => void chrome.runtime.openOptionsPage()} style={{ width: "100%", padding: "8px 10px" }}>
+      <button type="button" className="btn btn-block" onClick={() => void chrome.runtime.openOptionsPage()}>
         Open full settings
       </button>
     </main>

@@ -1,5 +1,5 @@
-import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { execFileSync, execSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 
 function readJson(path) {
@@ -25,8 +25,18 @@ if (!existsSync(artifactsDir)) {
 
 const outputName = `cocoon-v${packageJson.version}.zip`;
 const outputPath = resolve(artifactsDir, outputName);
+rmSync(outputPath, { force: true });
 
-execSync(`rm -f ${outputPath}`);
-execSync(`cd dist && zip -qr ${outputPath} .`);
+try {
+  execFileSync("zip", ["-qr", outputPath, "."], { cwd: resolve(root, "dist"), stdio: "inherit" });
+} catch (error) {
+  if (error.code === "ENOENT") {
+    console.error(
+      "Packaging requires the `zip` CLI (Linux/macOS: install via your package manager; Windows: use WSL)."
+    );
+    process.exit(1);
+  }
+  throw error;
+}
 
 console.log(`Packaged extension: ${outputPath}`);
