@@ -5,8 +5,8 @@ Copy/paste content for the Web Store developer dashboard. Keep this in sync with
 
 ## Basics
 
-- **Name:** Cocoon Beta
-- **Version:** 0.2.0 (must match `public/manifest.json`)
+- **Name:** Cocoon
+- **Version:** 1.0.0 (must match `public/manifest.json`)
 - **Category:** Accessibility (alt: Productivity)
 - **Language:** English
 
@@ -24,6 +24,10 @@ Copy/paste content for the Web Store developer dashboard. Keep this in sync with
 > • Sensory controls — dark mode and reduced motion
 > • Feed cleaner — hides algorithmic feed surfaces on supported social platforms
 > • Per-site overrides — turn the feed cleaner on/off per supported domain
+> • Scenario quick-switches — Focus, Low stimulation, Calm reset, and Social
+>   guardrails modes that expire on a timer you choose and restore your baseline
+> • Adaptive suggestions — optional, transparent per-domain and per-schedule
+>   profile suggestions (suggest-only by default)
 > • Grounding overlay — a quick breathing + 5-4-3-2-1 grounding flow
 >
 > Supported sites: x.com / twitter.com, facebook.com, instagram.com,
@@ -78,12 +82,15 @@ the custom domain `cocoon.lscaturchio.xyz` (set by `docs/CNAME`):
 The `Pages` workflow then deploys on every push to `main` that touches `docs/`.
 Until DNS + Pages are configured the workflow run shows red but gates nothing.
 
-## Assets to upload (you must create these)
+## Assets to upload
 
 - **Store icon:** 128×128 — use `public/icons/icon-128.png`.
-- **Screenshots:** at least one, 1280×800 or 640×400 PNG/JPEG. Suggested shots:
-  the popup controls, the options page, and a before/after of a cleaned feed.
-- **Small promo tile (optional):** 440×280.
+- **Screenshots:** 1280×800 PNGs are pre-generated in `docs/assets/store/`
+  (`screenshot-popup.png`, `screenshot-options.png`) — branded frames around
+  real captures of the built extension. Add a before/after of a cleaned feed
+  during manual domain QA if possible.
+- **Small promo tile:** `docs/assets/store/promo-440x280.png`.
+- **Marquee promo tile (optional):** `docs/assets/store/promo-1400x560.png`.
 
 ## Pre-upload checklist
 
