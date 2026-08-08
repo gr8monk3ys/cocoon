@@ -37,10 +37,13 @@ describe("feedRules", () => {
   });
 
   it("limits to the first selector at 'limited' and uses all at 'none'", () => {
-    const all = getFeedSelectors("reddit.com");
-    expect(getEffectiveFeedSelectors("reddit.com", "limited")).toEqual(all.slice(0, 1));
-    expect(getEffectiveFeedSelectors("reddit.com", "none")).toEqual(all);
-    expect(getEffectiveFeedSelectors("reddit.com", "full")).toEqual([]);
+    // Uses a host with more than one selector on purpose: on a single-selector
+    // host `limited` and `none` are trivially equal and this asserts nothing.
+    const all = getFeedSelectors("x.com");
+    expect(all.length).toBeGreaterThan(1);
+    expect(getEffectiveFeedSelectors("x.com", "limited")).toEqual(all.slice(0, 1));
+    expect(getEffectiveFeedSelectors("x.com", "none")).toEqual(all);
+    expect(getEffectiveFeedSelectors("x.com", "full")).toEqual([]);
     expect(getEffectiveFeedSelectors("example.com", "none")).toEqual([]);
   });
 });
