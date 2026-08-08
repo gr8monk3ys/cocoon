@@ -1,30 +1,50 @@
 # Continuous integration
 
-CI is intentionally lean for a small, private TypeScript extension. Each workflow
+CI is intentionally lean for a small, public TypeScript extension. Each workflow
 has a distinct job; overlapping/non-functional scanners were removed.
 
 ## Active workflows
 
 | Workflow | Purpose |
 | --- | --- |
-| `ci.yml` (`quality`) | Lint + test + build + `npm audit --omit=dev` (blocking) and a full-tree audit (informational) — the primary gate. Production deps block; dev-only transitives are surfaced but can't red the gate. |
-| `org-precommit.yml` | pre-commit hooks (ruff format/lint, etc.) |
+| `ci.yml` (`quality`) | Lint + test + build + `npm audit --omit=dev` (blocking) and a full-tree audit (informational) — the primary gate, and the **only required status check**. Production deps block; dev-only transitives are surfaced but can't red the gate. |
+| `codeql.yml` | SAST via GitHub code scanning (`security-and-quality` queries). Free on public repos. |
 | `semgrep.yml` | SAST (public rule packs, no token needed) |
-| `org-gitleaks.yml` | Secret scanning |
-| `org-trivy.yml` | Dependency/filesystem vulnerability scanning |
-| `org-trufflehog.yml` | Secret scanning (verified secrets) |
-| `pages.yml` | Deploys the `docs/` privacy/support site to GitHub Pages on pushes to `main` that touch `docs/`. |
-| `security-baseline.yml` | `npm audit` (high). Redundant with `ci.yml`'s audit, but kept because it is a **required status check** in branch protection — removing it would block all merges until branch protection is updated. |
+| `precommit.yml` | pre-commit hooks (ruff, check-yaml, detect-private-key, large files) |
+| `pages.yml` | Deploys the `docs/` privacy/support site to GitHub Pages on pushes to `main` that touch `docs/`, or on demand via `workflow_dispatch`. |
+| `security-baseline.yml` | `npm audit` (high). Redundant with `ci.yml`'s audit; retained as a cheap independent scheduled check. |
+
+Secret scanning is handled by **GitHub native secret scanning with push
+protection**, enabled in repo settings rather than by a workflow. Push
+protection blocks a secret at push time instead of reporting it after the fact,
+which is strictly better than the scanner workflows it replaced.
 
 Dependency updates are automated via Dependabot (`.github/dependabot.yml`,
 github-actions + npm).
 
 ## Removed and why
 
-- **`org-codeql.yml`** — CodeQL code scanning requires GitHub Advanced Security,
-  which is not enabled on this **private** repo, so the job could only ever fail
-  with "Code scanning is not enabled." `semgrep` provides SAST instead. Re-add it
-  if GHAS is enabled (Settings → Code security).
+- **All five `org-*.yml` workflows** (`org-ci-tests`, `org-gitleaks`,
+  `org-precommit`, `org-trivy`, `org-trufflehog`) — they called reusable
+  workflows in the **private** `gr8monk3ys/github` repo. A *public* repo cannot
+  call a reusable workflow from a *private* one, so every one of them broke the
+  moment this repo went public:
+
+  ```
+  gr8monk3ys/github/.github/workflows/reusable-gitleaks.yml@4a306a94
+    : workflow was not found
+  ```
+
+  They passed beforehand only because the repo was private. Coverage was moved
+  rather than dropped: secret scanning to GitHub native scanning + push
+  protection, SAST to `codeql.yml` + `semgrep.yml`, hooks to `precommit.yml`,
+  and `org-ci-tests` was already redundant with `ci.yml`'s test step. Trivy is
+  not replaced — `npm audit` (twice) plus Dependabot security updates already
+  cover dependency CVEs for a repo with two production dependencies.
+
+- **`org-codeql.yml`** — previously removed because CodeQL requires GitHub
+  Advanced Security, unavailable on a private repo. **Now re-added as
+  `codeql.yml`**: code scanning is free on public repositories.
 - **`org-osv.yml`** — The pinned upstream reusable workflow referenced a
   non-existent action path (`google/osv-scanner-action/scan-repo`), so it failed
   in seconds on every run. Dependency CVEs are covered by `npm audit` + Trivy +
@@ -36,14 +56,20 @@ github-actions + npm).
   automation. Versioning is handled manually via `npm run package:extension` +
   `docs/RELEASE.md`. Re-add it once the org reusable workflow is fixed.
 
-`codeql`, `osv`, and `release-please` are not required status checks, so removing
-them is safe. `security-baseline` IS a required check, so it is kept (despite
-duplicating `ci.yml`'s audit) until branch protection is updated to drop it.
+## Required status check
 
-## Possible further consolidation (not done)
+Branch protection on `main` requires exactly one context:
 
-- `org-ci-tests.yml` overlaps with `ci.yml`'s test step.
-- `org-gitleaks` and `org-trufflehog` are both secret scanners.
+```
+$ gh api repos/gr8monk3ys/cocoon/branches/main/protection \
+    --jq '.required_status_checks.contexts'
+["quality"]
+```
 
-These pass and are cheap, so they were left in place; drop one of each if you
-want a tighter pipeline.
+An earlier revision of this file claimed `security-baseline` was also required.
+It is not, and was not — only `quality` gates merges.
+
+Two properties of that name matter. It is the **PR-event** job name; the same
+workflow reports as `ci-tests / ci-tests-minimum` on `push`, so requiring the
+push-event name would block every merge permanently. And it must be sampled
+from a PR head commit, never from the default branch.
