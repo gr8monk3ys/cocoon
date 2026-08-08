@@ -6,6 +6,10 @@ on:
     paths:
       - "docs/**"
       - ".github/workflows/pages.yml"
+  # Manual redeploy. Pages can fail for reasons unrelated to a docs change
+  # (cert provisioning, custom-domain/DNS changes), and without this the only
+  # way to retry is an empty commit under docs/.
+  workflow_dispatch:
 
 permissions:
   contents: read

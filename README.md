@@ -111,6 +111,7 @@ audit runs informationally.
 
 ## More docs
 
+- `docs/MAINTENANCE.md` – maintenance status, and how to fix a broken feed selector
 - `docs/FEATURE_IDEAS.md` – prioritized next-step feature concepts
 - `docs/ROADMAP.md` – intentionally deferred work and the reliability watch list
 - `docs/PROFILE_RATIONALE.md` – profile intent and neurodivergent-fit guidance
