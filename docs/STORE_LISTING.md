@@ -65,22 +65,27 @@ Copy/paste content for the Web Store developer dashboard. Keep this in sync with
 ## Privacy policy URL (required)
 
 Published via GitHub Pages from `docs/` (see `.github/workflows/pages.yml`) on
-the custom domain `cocoon.lscaturchio.xyz` (set by `docs/CNAME`):
+the default `github.io` domain:
 
-- Privacy: `https://cocoon.lscaturchio.xyz/privacy/`
-- Support: `https://cocoon.lscaturchio.xyz/support/`
+- Privacy: `https://gr8monk3ys.github.io/cocoon/privacy/`
+- Support: `https://gr8monk3ys.github.io/cocoon/support/`
 
-**One-time setup:**
+These serve over HTTPS with a GitHub-issued certificate and need no DNS setup.
+The `Pages` workflow deploys on every push to `main` that touches `docs/`, and
+can be re-run by hand via **workflow_dispatch**.
 
-1. **DNS** (at your `lscaturchio.xyz` registrar): add a CNAME record
-   `cocoon` → `gr8monk3ys.github.io`. (Apex `lscaturchio.xyz` is untouched and
-   keeps serving its existing page.)
-2. **Repo:** Settings → Pages → Build and deployment → Source: **GitHub
-   Actions**; the custom domain is applied automatically from `docs/CNAME`.
-   Enable **Enforce HTTPS** once the certificate is issued.
+### Why not a custom domain
 
-The `Pages` workflow then deploys on every push to `main` that touches `docs/`.
-Until DNS + Pages are configured the workflow run shows red but gates nothing.
+`cocoon.lscaturchio.xyz` was configured here previously and never worked. The
+`lscaturchio.xyz` zone is served by Cloudflare nameservers, and the `cocoon`
+record resolves to the same Cloudflare IPs as the apex — it was never pointed
+at GitHub Pages. The proxy also intercepts GitHub's ACME validation, so the
+Pages certificate stayed unissued and visitors got a Cloudflare `525`.
+
+A custom domain buys nothing for a Web Store listing, so it was removed rather
+than debugged. To reinstate it later: point `cocoon` at `gr8monk3ys.github.io`
+as a **DNS-only** (unproxied) CNAME, re-add `docs/CNAME`, and enable Enforce
+HTTPS once the certificate issues.
 
 ## Assets to upload
 
