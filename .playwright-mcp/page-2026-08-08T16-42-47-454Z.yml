@@ -1,0 +1,46 @@
+- main [ref=e3]:
+  - heading "Cocoon" [level=1] [ref=e5]
+  - generic [ref=e7]:
+    - text: Profile
+    - combobox "Profile" [ref=e8]:
+      - option "ADHD" [selected]
+      - option "Autism"
+      - option "Anxiety"
+      - option "Custom"
+  - generic [ref=e9]:
+    - text: Feed intensity
+    - combobox "Feed intensity" [ref=e10]:
+      - option "Full"
+      - option "Limited" [selected]
+      - option "None"
+  - generic [ref=e11]:
+    - checkbox "Dark mode" [ref=e12]
+    - text: Dark mode
+  - generic [ref=e13]:
+    - checkbox "Reduce motion" [checked] [ref=e14]
+    - text: Reduce motion
+  - generic [ref=e15]:
+    - checkbox "Enable grounding overlay" [checked] [ref=e16]
+    - text: Enable grounding overlay
+  - generic [ref=e17]:
+    - heading "Scenario quick-switches" [level=2] [ref=e18]
+    - generic [ref=e19]:
+      - text: Scenario length
+      - combobox "Scenario length" [ref=e20]:
+        - option "15 minutes"
+        - option "30 minutes" [selected]
+        - option "60 minutes"
+    - generic [ref=e21]:
+      - button "Focus" [ref=e22] [cursor=pointer]
+      - button "Low stimulation" [ref=e23] [cursor=pointer]
+      - button "Calm reset" [ref=e24] [cursor=pointer]
+      - button "Social guardrails" [ref=e25] [cursor=pointer]
+  - generic [ref=e26]:
+    - heading "Current site override" [level=2] [ref=e27]
+    - paragraph [ref=e28]: "Site: x.com"
+    - generic [ref=e29]:
+      - checkbox "Enable feed cleaner on this site" [checked] [ref=e30]
+      - text: Enable feed cleaner on this site
+    - button "Reset to global default" [ref=e31] [cursor=pointer]
+  - button "Open grounding tool" [ref=e32] [cursor=pointer]
+  - button "Open full settings" [ref=e33] [cursor=pointer]

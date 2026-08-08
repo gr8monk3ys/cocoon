@@ -1,0 +1,84 @@
+- main [ref=f1e3]:
+  - heading "Cocoon Settings" [level=1] [ref=f1e5]
+  - paragraph [ref=f1e7]: Settings are stored locally. Adaptive suggestions are user-controlled and transparent.
+  - generic [ref=f1e8]:
+    - heading "Profile presets" [level=2] [ref=f1e9]
+    - generic [ref=f1e10]:
+      - text: Profile
+      - combobox "Profile" [ref=f1e11]:
+        - option "ADHD focus" [selected]
+        - option "Autism sensory"
+        - option "Anxiety calm"
+        - option "Custom"
+  - generic [ref=f1e12]:
+    - heading "Feature toggles" [level=2] [ref=f1e13]
+    - generic [ref=f1e14]:
+      - text: Feed intensity
+      - combobox "Feed intensity" [ref=f1e15]:
+        - option "Full feed"
+        - option "Limited feed" [selected]
+        - option "No feed"
+    - generic [ref=f1e16]:
+      - checkbox "Dark mode" [ref=f1e17]
+      - text: Dark mode
+    - paragraph [ref=f1e18]: Lightweight dark mode via color inversion. For full, per-site theming we recommend a dedicated extension such as Dark Reader.
+    - generic [ref=f1e19]:
+      - checkbox "Reduce motion" [checked] [ref=f1e20]
+      - text: Reduce motion
+    - generic [ref=f1e21]:
+      - checkbox "Enable grounding tool" [checked] [ref=f1e22]
+      - text: Enable grounding tool
+  - generic [ref=f1e23]:
+    - heading "Scenario quick-switches" [level=2] [ref=f1e24]
+    - generic [ref=f1e25]:
+      - text: Scenario length
+      - combobox "Scenario length" [ref=f1e26]:
+        - option "15 minutes"
+        - option "30 minutes" [selected]
+        - option "60 minutes"
+    - generic [ref=f1e27]:
+      - button "Focus session" [ref=f1e28] [cursor=pointer]
+      - button "Low stimulation" [ref=f1e29] [cursor=pointer]
+      - button "Calm reset" [ref=f1e30] [cursor=pointer]
+      - button "Social guardrails" [ref=f1e31] [cursor=pointer]
+  - generic [ref=f1e32]:
+    - heading "Adaptive profile engine" [level=2] [ref=f1e33]
+    - generic [ref=f1e34]:
+      - checkbox "Enable adaptive suggestions" [ref=f1e35]
+      - text: Enable adaptive suggestions
+    - generic [ref=f1e36]:
+      - checkbox "Suggest, don’t force" [checked] [ref=f1e37]
+      - text: Suggest, don’t force
+    - heading "Domain rules" [level=3] [ref=f1e38]
+    - generic [ref=f1e39]:
+      - textbox "Domain rule hostname" [ref=f1e40]:
+        - /placeholder: reddit.com
+      - combobox "Domain rule profile" [ref=f1e41]:
+        - option "ADHD" [selected]
+        - option "Autism"
+        - option "Anxiety"
+        - option "Custom"
+      - button "Save" [ref=f1e42] [cursor=pointer]
+    - list
+    - heading "Schedule rules" [level=3] [ref=f1e43]
+    - generic [ref=f1e44]:
+      - spinbutton "Schedule start hour" [ref=f1e45]: "18"
+      - spinbutton "Schedule end hour" [ref=f1e46]: "23"
+      - combobox "Schedule rule profile" [ref=f1e47]:
+        - option "ADHD"
+        - option "Autism"
+        - option "Anxiety" [selected]
+        - option "Custom"
+      - button "Add" [ref=f1e48] [cursor=pointer]
+    - list
+  - generic [ref=f1e49]:
+    - heading "Per-site feed cleaner overrides" [level=2] [ref=f1e50]
+    - paragraph [ref=f1e51]: "Supported domains: x/twitter, facebook/instagram, youtube, reddit, tiktok."
+    - generic [ref=f1e52]:
+      - textbox "Hostname" [ref=f1e53]:
+        - /placeholder: e.g. reddit.com
+      - generic [ref=f1e54]:
+        - checkbox "Enable" [checked] [ref=f1e55]
+        - text: Enable
+      - button "Save" [ref=f1e56] [cursor=pointer]
+    - paragraph [ref=f1e57]: No per-site overrides yet.
