@@ -1,18 +1,32 @@
 /*
- * Cocoon brand theme — shared by the popup and options pages.
+ * Cocoon theme — shared by the popup and options pages.
  *
- * Palette anchors match the app icon: periwinkle indigo (#636EFA) fading to
- * calm teal (#33C9C0), deep indigo (#3B4AC4) for actions, silk near-white
- * surfaces. Motion is intentionally absent: no transitions or animations,
- * consistent with the reduce-motion goal of the product.
+ * Two rules drive the whole sheet, and both are product constraints before
+ * they are taste:
+ *
+ * 1. SEPARATE WITH SPACE AND ONE THREAD, NOT WITH BOXES. The audience is
+ *    people reducing sensory load. Nested bordered cards give every section
+ *    identical weight and fill the view with edges; a single silk thread down
+ *    the left of each section marks structure with one line instead of four.
+ * 2. NO NATIVE CONTROLS. Chrome paints its own chevrons, borders and
+ *    checkmarks, which is what makes an otherwise-styled UI look unfinished.
+ *    `accent-color` only recolors the tick; the box stays the platform's.
+ *
+ * Hierarchy comes from TREATMENT rather than size: section headings are small
+ * letterspaced eyebrows, not big text. That keeps contrast low — appropriate
+ * here — while still making structure obvious at a glance.
+ *
+ * Motion is intentionally absent: no transitions, no animations. Reduce-motion
+ * is a core product feature and the UI models it.
  */
 
 :root {
   --cocoon-ink: #20264a;
   --cocoon-muted: #5a6180;
-  --cocoon-bg: #f4f5fc;
+  --cocoon-bg: #f7f8fd;
   --cocoon-surface: #ffffff;
-  --cocoon-border: #dcdff0;
+  --cocoon-border: #d8dcef;
+  --cocoon-field: #ffffff;
   --cocoon-primary: #3b4ac4;
   --cocoon-primary-soft: #eef1fe;
   --cocoon-primary-soft-border: #c7cdf4;
@@ -23,6 +37,11 @@
   --cocoon-btn-bg: #3b4ac4;
   --cocoon-btn-bg-hover: #333fa8;
   --cocoon-btn-ink: #ffffff;
+  --cocoon-thread: linear-gradient(180deg, #636efa, #33c9c0);
+  /* Chevron and checkmark are inlined per scheme: a data URI cannot inherit
+     currentColor, so each theme carries its own. */
+  --cocoon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%235a6180' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --cocoon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='10' viewBox='0 0 12 10'%3E%3Cpath d='M1 5.2 4.3 8.5 11 1.5' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,6 +51,7 @@
     --cocoon-bg: #171a2f;
     --cocoon-surface: #20243d;
     --cocoon-border: #343a5c;
+    --cocoon-field: #1d2138;
     --cocoon-primary: #8d96ff;
     --cocoon-primary-soft: #272c4d;
     --cocoon-primary-soft-border: #3d4470;
@@ -42,6 +62,8 @@
     --cocoon-btn-bg: #8d96ff;
     --cocoon-btn-bg-hover: #a4abff;
     --cocoon-btn-ink: #171a2f;
+    --cocoon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23a3a9c9' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --cocoon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='10' viewBox='0 0 12 10'%3E%3Cpath d='M1 5.2 4.3 8.5 11 1.5' fill='none' stroke='%23171a2f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
 }
 
@@ -55,81 +77,163 @@ body {
   color: var(--cocoon-ink);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 :focus-visible {
   outline: 2px solid var(--cocoon-focus);
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .cocoon-app.popup {
   width: 340px;
-  padding: 14px 16px 16px;
+  padding: 16px 18px 18px;
 }
 
 .cocoon-app.options {
-  max-width: 760px;
-  margin: 32px auto 48px;
-  padding: 0 16px;
+  max-width: 680px;
+  margin: 40px auto 64px;
+  padding: 0 20px;
 }
+
+/* ---- Masthead ---------------------------------------------------------- */
 
 .cocoon-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .cocoon-header img {
-  border-radius: 6px;
+  border-radius: 7px;
 }
 
 .cocoon-header h1 {
   margin: 0;
-  font-size: 20px;
-  letter-spacing: -0.01em;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
 }
 
 .cocoon-app.options .cocoon-header h1 {
-  font-size: 24px;
+  font-size: 26px;
 }
 
-/* The one decorative brand touch: a static indigo→teal silk thread. */
+/*
+ * The signature: one silk thread. It is the only gradient in the UI, it marks
+ * the masthead, and the same 2px thread reappears as each section's left rail —
+ * so the brand element is doing structural work rather than decorating.
+ */
 .brand-rule {
-  height: 3px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #636efa, #33c9c0);
-  margin: 8px 0 14px;
+  width: 44px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--cocoon-thread);
+  margin: 10px 0 18px;
 }
 
 .lede {
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   color: var(--cocoon-muted);
 }
 
+/* ---- Sections ---------------------------------------------------------- */
+
+/*
+ * Was: white box, 1px border all round, 12px radius, stacked — which on the
+ * options page nested three deep. Now each section hangs off a thread rail.
+ * One line instead of a rectangle, and nesting stops compounding.
+ */
 .card {
-  background: var(--cocoon-surface);
-  border: 1px solid var(--cocoon-border);
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 12px;
+  position: relative;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 2px 0 2px 16px;
+  margin: 0 0 22px;
 }
 
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--cocoon-thread);
+  opacity: 0.5;
+}
+
+/* A section nested inside another is a sub-step, not a peer: it gets a flat
+   tinted panel rather than a second rail, so rails never stack. */
+.card .card {
+  padding: 12px 14px;
+  margin: 12px 0 4px;
+  background: var(--cocoon-primary-soft);
+  border-radius: 10px;
+}
+
+.card .card::before {
+  display: none;
+}
+
+/* Section headings are eyebrows: small, letterspaced, quiet. Structure reads
+   from treatment, so contrast stays low. */
 .card h2 {
-  margin: 0 0 10px;
-  font-size: 15px;
+  margin: 0 0 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--cocoon-muted);
 }
 
 .card h3 {
-  margin: 12px 0 8px;
-  font-size: 13.5px;
+  margin: 16px 0 8px;
+  font-size: 13px;
+  font-weight: 600;
 }
+
+/* ---- Fields ------------------------------------------------------------ */
 
 .field {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
   font-weight: 500;
+}
+
+select,
+input[type="text"],
+input[type="number"] {
+  font: inherit;
+  font-weight: 400;
+  color: var(--cocoon-ink);
+  background-color: var(--cocoon-field);
+  border: 1px solid var(--cocoon-border);
+  border-radius: 9px;
+  padding: 9px 11px;
+}
+
+input[type="text"]::placeholder,
+input[type="number"]::placeholder {
+  color: var(--cocoon-muted);
+  opacity: 0.75;
+}
+
+/* Kill the platform chevron and draw our own, so the control matches the rest
+   of the UI instead of the operating system. */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 32px;
+  background-image: var(--cocoon-chevron);
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
 }
 
 .field select,
@@ -137,63 +241,68 @@ body {
 .field input[type="number"] {
   display: block;
   width: 100%;
-  margin-top: 4px;
-  padding: 6px 9px;
-  font: inherit;
-  font-weight: 400;
-  color: var(--cocoon-ink);
-  background: var(--cocoon-surface);
-  border: 1px solid var(--cocoon-border);
-  border-radius: 8px;
+  margin-top: 6px;
 }
 
-input[type="text"],
-input[type="number"],
-select {
-  font: inherit;
-  color: var(--cocoon-ink);
-  background: var(--cocoon-surface);
-  border: 1px solid var(--cocoon-border);
-  border-radius: 8px;
-  padding: 6px 9px;
-}
+/* ---- Checkboxes -------------------------------------------------------- */
 
 .checkbox-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 input[type="checkbox"] {
-  width: 15px;
-  height: 15px;
-  accent-color: var(--cocoon-primary);
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1px solid var(--cocoon-border);
+  border-radius: 6px;
+  background-color: var(--cocoon-field);
+  cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--cocoon-primary);
+  border-color: var(--cocoon-primary);
+  background-image: var(--cocoon-check);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.checkbox-row label {
+  cursor: pointer;
 }
 
 .hint {
-  margin: 2px 0 10px 23px;
-  font-size: 12px;
+  margin: 2px 0 12px 28px;
+  font-size: 12.5px;
   color: var(--cocoon-muted);
 }
+
+/* ---- Buttons ----------------------------------------------------------- */
 
 button {
   font: inherit;
 }
 
 .btn {
-  border: 0;
-  border-radius: 999px;
-  padding: 7px 14px;
+  border: 1px solid var(--cocoon-primary-soft-border);
+  border-radius: 9px;
+  padding: 9px 14px;
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   background: var(--cocoon-primary-soft);
-  border: 1px solid var(--cocoon-primary-soft-border);
   color: var(--cocoon-ink);
 }
 
 .btn:hover {
-  background: var(--cocoon-border);
+  border-color: var(--cocoon-primary);
 }
 
 .btn-primary {
@@ -219,8 +328,8 @@ button {
 }
 
 .btn-small {
-  padding: 3px 10px;
-  font-size: 12px;
+  padding: 7px 12px;
+  font-size: 12.5px;
   margin-left: 8px;
 }
 
@@ -236,7 +345,7 @@ button {
 .inline-form {
   display: grid;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   align-items: center;
 }
 
@@ -245,13 +354,16 @@ button {
 }
 
 .inline-form.schedule-row {
-  grid-template-columns: 80px 80px 1fr auto;
+  grid-template-columns: 84px 84px 1fr auto;
 }
 
+/* ---- Feedback ---------------------------------------------------------- */
+
 .field-error {
-  margin: 6px 0 8px;
-  padding: 7px 10px;
-  border-radius: 8px;
+  margin: 8px 0;
+  padding: 8px 11px;
+  border-radius: 9px;
+  border-left: 2px solid var(--cocoon-error);
   font-size: 13px;
   color: var(--cocoon-error);
   background: var(--cocoon-error-soft);
@@ -259,24 +371,24 @@ button {
 
 .item-list {
   margin: 0;
-  padding-left: 20px;
+  padding-left: 18px;
 }
 
 .item-list li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .suggestion {
-  padding: 10px 12px;
-  border: 1px solid var(--cocoon-primary-soft-border);
+  padding: 11px 13px;
+  border-left: 2px solid var(--cocoon-primary);
   background: var(--cocoon-primary-soft);
-  border-radius: 10px;
-  margin-bottom: 10px;
+  border-radius: 0 9px 9px 0;
+  margin-bottom: 12px;
   font-size: 13px;
 }
 
 .save-toast {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   font-weight: 600;
   color: var(--cocoon-teal-ink);
 }
@@ -287,7 +399,7 @@ button {
 }
 
 .site-line {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-size: 12.5px;
   color: var(--cocoon-muted);
 }
