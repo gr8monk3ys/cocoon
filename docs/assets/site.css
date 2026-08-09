@@ -68,8 +68,9 @@ header img {
 
 h1 {
   margin: 0;
-  font-size: 28px;
-  letter-spacing: -0.01em;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
 }
 
 .subtitle {
@@ -77,12 +78,18 @@ h1 {
   color: var(--muted);
 }
 
-/* The brand's one expressive element: a silk-thread divider. */
+/*
+ * The signature: one silk thread. It marks the masthead as a short stub, and
+ * the same 2px thread reappears as each section's left rail — so the brand
+ * element does structural work rather than decorating. A full-width bar here
+ * competed with the rails and read as a plain underline.
+ */
 .brand-rule {
-  height: 3px;
-  border-radius: 999px;
+  width: 44px;
+  height: 2px;
+  border-radius: 2px;
   background: linear-gradient(90deg, var(--grad-a), var(--grad-b));
-  margin: 14px 0 18px;
+  margin: 14px 0 22px;
 }
 
 nav {
@@ -101,19 +108,45 @@ a:hover {
   text-decoration: underline;
 }
 
+/*
+ * Sections hang off a thread rail instead of sitting in bordered boxes. The
+ * audience is people reducing sensory load: a page of nested rectangles is a
+ * page of edges, and separating with space plus one line says the same thing
+ * with far less visual noise.
+ */
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px 18px 10px;
+  position: relative;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 2px 0 2px 20px;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--grad-a), var(--grad-b));
+  opacity: 0.5;
 }
 
 .card + .card {
-  margin-top: 14px;
+  margin-top: 34px;
 }
 
+/* Headings are eyebrows: hierarchy from treatment, not size, so contrast
+   stays low while structure stays obvious. */
 .card h2 {
-  margin-top: 0;
+  margin: 0 0 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .meta {
@@ -148,21 +181,23 @@ ol {
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px 28px;
   margin: 4px 0 10px;
 }
 
 .feature {
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-soft-border);
-  border-radius: 12px;
-  padding: 12px 14px;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  padding: 12px 0 0;
 }
 
 .feature h3 {
-  margin: 0 0 4px;
-  font-size: 15px;
+  margin: 0 0 5px;
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 .feature p {

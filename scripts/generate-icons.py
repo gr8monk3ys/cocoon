@@ -28,13 +28,42 @@ TOP = (0x63, 0x6E, 0xFA)  # periwinkle indigo
 BOTTOM = (0x33, 0xC9, 0xC0)  # calm teal
 POD = (245, 247, 255)  # near-white silk
 BAND = (0x3B, 0x4A, 0xC4)  # indigo wrap thread
-# Silk threads curve around the pod instead of crossing it as straight lines:
-# each band's center dips toward the viewer at the pod's midline, which reads
-# as thread wrapped around a 3D form. Centers are in pod-normalized y, shifted
-# up slightly so the curved bands stay visually balanced.
-BANDS = (-0.61, -0.06, 0.49)  # band endpoint heights in pod-normalized y
-BAND_DIP = 0.12  # extra dip at the pod's horizontal center
-BAND_HALF_WIDTH = 0.06  # half-thickness of a band in pod-normalized y
+# Silk threads.
+#
+# The previous mark used three PARALLEL HORIZONTAL bands inside a SYMMETRIC
+# ellipse, which reads as a stack of coins rather than a wrapped pod: parallel
+# horizontal lines say "layers stacked", and a 0.12 dip is far too subtle to
+# overcome that. Wound thread reads instead from three cues, all used here:
+#   1. bands tilted off horizontal (BAND_SLOPE)
+#   2. uneven spacing, tighter toward the narrow end, as real winding is
+#   3. an asymmetric silhouette so there IS a narrow end (see pod_half_width)
+BANDS = (-0.46, 0.06, 0.56)  # band centers in pod-normalized y
+BAND_SLOPE = -0.42  # rise across the pod's half-width: tilts bands off horizontal
+BAND_DIP = 0.10  # extra dip at the pod's horizontal center (wrap illusion)
+BAND_HALF_WIDTH = 0.078  # half-thickness of a band in pod-normalized y
+
+# Pod silhouette: rounded at the top, tapering to a soft point at the bottom,
+# like a chrysalis hanging from a branch. The asymmetry is what stops it
+# reading as an egg or a jar.
+POD_TOP_POWER = 0.50  # ~0.5 is a true ellipse half
+POD_BOTTOM_POWER = 1.35  # >0.5 tapers to a point
+
+
+def pod_half_width(t):
+    """Half-width of the pod at pod-normalized height t in [-1, 1], where
+    t = -1 is the top tip and t = +1 the bottom tip. Returns a fraction of the
+    pod's max half-width."""
+    if abs(t) >= 1.0:
+        return 0.0
+    power = POD_TOP_POWER if t < 0 else POD_BOTTOM_POWER
+    return (1.0 - t * t) ** power
+
+
+def band_offset(ex):
+    """Vertical offset applied to every band centre at normalized x `ex`.
+    Tilt plus a centre dip: together they read as thread passing around a
+    three-dimensional form rather than lying flat across a disc."""
+    return BAND_SLOPE * ex + BAND_DIP * (1.0 - ex * ex)
 
 
 def write_png(path, size, pixels):
@@ -67,8 +96,8 @@ def render(size):
     margin = 0.03 * size
     half = size / 2.0 - margin
     corner = 0.28 * size
-    pod_rx = 0.215 * size
-    pod_ry = 0.33 * size
+    pod_rx = 0.20 * size
+    pod_ry = 0.345 * size
     px = bytearray(size * size * 4)
 
     for y in range(size):
@@ -95,16 +124,23 @@ def render(size):
                     b = TOP[2] + (BOTTOM[2] - TOP[2]) * t
                     ex = (fx - cx) / pod_rx
                     ey = (fy - cy) / pod_ry
-                    if ex * ex + ey * ey <= 1.0:
+                    if abs(ey) < 1.0 and abs(ex) <= pod_half_width(ey):
                         r, g, b = POD
-                        yy = (fy - cy) / pod_ry
-                        curve = BAND_DIP * (1.0 - ex * ex)
+                        # Normalize x across the pod's width AT THIS HEIGHT, so
+                        # the tilt+dip follow the silhouette instead of running
+                        # off it near the tapered end.
+                        w = pod_half_width(ey)
+                        exn = ex / w if w > 0.0 else 0.0
                         if any(
-                            abs(yy - (ly + curve)) < BAND_HALF_WIDTH for ly in BANDS
+                            abs(ey - (ly + band_offset(exn))) < BAND_HALF_WIDTH
+                            for ly in BANDS
                         ):
-                            r = r * 0.5 + BAND[0] * 0.5
-                            g = g * 0.5 + BAND[1] * 0.5
-                            b = b * 0.5 + BAND[2] * 0.5
+                            # 0.35/0.65 rather than an even blend: at an even
+                            # mix the indigo thread washes out to pale lavender
+                            # against the silk pod and the wrap stops reading.
+                            r = r * 0.35 + BAND[0] * 0.65
+                            g = g * 0.35 + BAND[1] * 0.65
+                            b = b * 0.35 + BAND[2] * 0.65
                     sum_r += r
                     sum_g += g
                     sum_b += b
@@ -120,25 +156,71 @@ def render(size):
     return px
 
 
-# Vector master of the icon. The band paths mirror the raster renderer: each
-# silk thread dips BAND_DIP toward the pod's center (quadratic control point =
-# 2*midpoint - endpoint), clipped to the pod ellipse.
-SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+def build_svg(size=128):
+    """Vector master, derived from the SAME pod_half_width/band_offset used by
+    the raster renderer.
+
+    Previously the SVG was a hand-written constant duplicating the raster
+    geometry, so the two could drift silently — a redesign that touched only
+    the Python constants would leave the site and store logo on the old mark.
+    Sampling both from one source removes that class of bug entirely.
+    """
+    cx = cy = size / 2.0
+    pod_rx = 0.20 * size
+    pod_ry = 0.345 * size
+    margin = 0.03 * size
+    rect_xy = margin
+    rect_wh = size - 2 * margin
+    steps = 96
+
+    def fmt(x, y):
+        return f"{x:.2f} {y:.2f}"
+
+    # Pod outline: down the right edge, back up the left.
+    right, left = [], []
+    for i in range(steps + 1):
+        t = -1.0 + 2.0 * i / steps
+        w = pod_half_width(t) * pod_rx
+        y = cy + t * pod_ry
+        right.append(fmt(cx + w, y))
+        left.append(fmt(cx - w, y))
+    outline = "M" + " L".join(right + list(reversed(left))) + " Z"
+
+    # Band centrelines, parametrised across the pod's width at each height.
+    bands = []
+    for ly in BANDS:
+        pts = []
+        for i in range(steps + 1):
+            exn = -1.0 + 2.0 * i / steps
+            ey = ly + band_offset(exn)
+            if abs(ey) >= 1.0:
+                continue
+            w = pod_half_width(ey) * pod_rx
+            pts.append(fmt(cx + exn * w, cy + ey * pod_ry))
+        if len(pts) > 1:
+            bands.append("M" + " L".join(pts))
+
+    stroke = 2.0 * BAND_HALF_WIDTH * pod_ry
+    band_paths = "\n    ".join(f'<path d="{d}"/>' for d in bands)
+    pod_hex = "#%02X%02X%02X" % POD
+    band_hex = "#%02X%02X%02X" % BAND
+    top_hex = "#%02X%02X%02X" % TOP
+    bottom_hex = "#%02X%02X%02X" % BOTTOM
+
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#636EFA"/>
-      <stop offset="1" stop-color="#33C9C0"/>
+      <stop offset="0" stop-color="{top_hex}"/>
+      <stop offset="1" stop-color="{bottom_hex}"/>
     </linearGradient>
     <clipPath id="pod">
-      <ellipse cx="64" cy="64" rx="27.5" ry="42"/>
+      <path d="{outline}"/>
     </clipPath>
   </defs>
-  <rect x="4" y="4" width="120" height="120" rx="34" fill="url(#g)"/>
-  <ellipse cx="64" cy="64" rx="27.5" ry="42" fill="#F5F7FF"/>
-  <g clip-path="url(#pod)" fill="none" stroke="#3B4AC4" stroke-width="5" opacity="0.9">
-    <path d="M34 38.4 Q64 48.4 94 38.4"/>
-    <path d="M34 61.5 Q64 71.5 94 61.5"/>
-    <path d="M34 84.6 Q64 94.6 94 84.6"/>
+  <rect x="{rect_xy:.0f}" y="{rect_xy:.0f}" width="{rect_wh:.0f}" height="{rect_wh:.0f}" rx="{0.28 * size:.0f}" fill="url(#g)"/>
+  <path d="{outline}" fill="{pod_hex}"/>
+  <g clip-path="url(#pod)" fill="none" stroke="{band_hex}" stroke-width="{stroke:.1f}" stroke-linecap="round" opacity="0.9">
+    {band_paths}
   </g>
 </svg>
 """
@@ -156,7 +238,7 @@ def main():
     # copied into dist/ — the manifest only references the PNG sizes.
     os.makedirs(DOCS_ASSETS, exist_ok=True)
     with open(os.path.join(DOCS_ASSETS, "icon.svg"), "w") as f:
-        f.write(SVG)
+        f.write(build_svg())
     print("wrote docs/assets/icon.svg")
 
     for size in SITE_SIZES:

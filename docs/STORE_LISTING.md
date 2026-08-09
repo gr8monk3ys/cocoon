@@ -90,10 +90,13 @@ HTTPS once the certificate issues.
 ## Assets to upload
 
 - **Store icon:** 128×128 — use `public/icons/icon-128.png`.
-- **Screenshots:** 1280×800 PNGs are pre-generated in `docs/assets/store/`
-  (`screenshot-popup.png`, `screenshot-options.png`) — branded frames around
-  real captures of the built extension. Add a before/after of a cleaned feed
-  during manual domain QA if possible.
+- **Screenshots:** ⚠️ **`docs/assets/store/*.png` are stale — do not upload as
+  is.** They were captured before the UI and icon were reworked, so they show
+  the old boxed layout, native form controls, and the previous coin-stack mark.
+  Recapture the popup and options pages from a freshly built `dist/` before
+  submitting; uploading these would advertise a version of the product that no
+  longer exists. Add a before/after of a cleaned feed during manual domain QA
+  if possible.
 - **Small promo tile:** `docs/assets/store/promo-440x280.png`.
 - **Marquee promo tile (optional):** `docs/assets/store/promo-1400x560.png`.
 
