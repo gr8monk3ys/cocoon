@@ -21,10 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@c3400c2f38909e0dcf3c3a41f2030a8217be5d3e
+        uses: github/codeql-action/init@c4dd10e44af883a891fe31ced449bcb4a6728b9b
         with:
           languages: javascript-typescript
           queries: security-and-quality
