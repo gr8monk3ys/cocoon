@@ -88,3 +88,42 @@ export function countFeedMatches(root: ParentNode, hostname: string, intensity: 
   }
   return count;
 }
+
+/**
+ * Effective selectors that currently match nothing, while at least one sibling
+ * still does — i.e. *partial* rot.
+ *
+ * `countFeedMatches` sums across selectors, so it cannot see this: Reddit
+ * carried a dead `[data-testid='post-container']` rule for months while
+ * `shreddit-feed` kept the total above zero and the user-facing rot warning
+ * silent. Partial rot is invisible to the total by construction, and it is the
+ * more common kind, because sites rarely rename every feed surface at once.
+ *
+ * Returns [] when nothing matches at all — that is total rot, which
+ * `countFeedMatches` already reports to the user.
+ */
+export function findDeadFeedSelectors(
+  root: ParentNode,
+  hostname: string,
+  intensity: FeedIntensity
+): string[] {
+  const selectors = getEffectiveFeedSelectors(hostname, intensity);
+  const dead: string[] = [];
+  let anyMatched = false;
+
+  for (const selector of selectors) {
+    let n = 0;
+    try {
+      n = root.querySelectorAll(selector).length;
+    } catch {
+      // Malformed selector: report it as dead rather than throwing.
+    }
+    if (n > 0) {
+      anyMatched = true;
+    } else {
+      dead.push(selector);
+    }
+  }
+
+  return anyMatched ? dead : [];
+}

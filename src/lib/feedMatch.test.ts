@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest";
-import { countFeedMatches } from "./feedRules";
+import { countFeedMatches, findDeadFeedSelectors, getFeedSelectors } from "./feedRules";
 
 describe("countFeedMatches (selector-rot detection)", () => {
   afterEach(() => {
@@ -21,6 +21,32 @@ describe("countFeedMatches (selector-rot detection)", () => {
     document.body.innerHTML = "<shreddit-feed></shreddit-feed>";
     expect(countFeedMatches(document, "example.com", "none")).toBe(0);
     expect(countFeedMatches(document, "reddit.com", "full")).toBe(0);
+  });
+
+  it("reports a dead selector while a sibling still matches (partial rot)", () => {
+    // The exact shape countFeedMatches cannot see: the total stays above zero,
+    // so no user-facing rot warning fires, while half the rule is dead.
+    const [live, dead] = getFeedSelectors("x.com");
+    document.body.innerHTML = "<div aria-label='Timeline: Your Home Timeline'></div>";
+
+    expect(countFeedMatches(document, "x.com", "none")).toBe(1);
+    expect(findDeadFeedSelectors(document, "x.com", "none")).toEqual([dead]);
+    expect(live).toBe("[aria-label='Timeline: Your Home Timeline']");
+  });
+
+  it("reports nothing when every selector matches", () => {
+    document.body.innerHTML =
+      "<div aria-label='Timeline: Your Home Timeline'></div>" +
+      "<div data-testid='primaryColumn'><div role='region'></div></div>";
+    expect(findDeadFeedSelectors(document, "x.com", "none")).toEqual([]);
+  });
+
+  it("reports nothing on total rot, which countFeedMatches already surfaces", () => {
+    // Every selector dead is not *partial* rot. Returning all of them here would
+    // duplicate the user-facing warning as a console warning on every page load.
+    document.body.innerHTML = "<div class='totally-different-layout'></div>";
+    expect(countFeedMatches(document, "x.com", "none")).toBe(0);
+    expect(findDeadFeedSelectors(document, "x.com", "none")).toEqual([]);
   });
 
   it("does not match a Reddit post page at any intensity", () => {

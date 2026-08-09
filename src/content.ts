@@ -1,4 +1,9 @@
-import { buildFeedCleanerCss, countFeedMatches, supportsFeedCleaner } from "./lib/feedRules";
+import {
+  buildFeedCleanerCss,
+  countFeedMatches,
+  findDeadFeedSelectors,
+  supportsFeedCleaner
+} from "./lib/feedRules";
 import { getFeedIntensityForHost, getSettings } from "./lib/settings";
 import type { CocoonMessage, CocoonSettings, FeedIntensity } from "./lib/types";
 
@@ -11,6 +16,7 @@ let feedBanner: HTMLDivElement | null = null;
 let feedBannerKind: BannerKind | null = null;
 let feedBannerDismissed = false;
 let feedCheckToken = 0;
+let partialRotReported = false;
 
 /**
  * Per-host banner history, persisted separately from settings so the
@@ -299,6 +305,32 @@ function setFeedBanner(message: string, kind: BannerKind): void {
   }
 }
 
+/**
+ * Reports *partial* rot — some feed selectors for this host are dead while
+ * others still match — to the console, once per page load.
+ *
+ * Deliberately not a banner. When one selector still matches, the feed is still
+ * being hidden, so the feature is working from the user's point of view and a
+ * warning would be pure noise. `docs/BRAND.md` treats an unnecessary banner as a
+ * stressor, which is exactly the wrong thing to hand someone using a calm-focused
+ * extension. The audience for partial rot is whoever maintains `FEED_RULES`, so
+ * it goes where a maintainer or bug reporter will look and a user never will.
+ */
+function reportPartialRot(hostname: string, intensity: FeedIntensity): void {
+  if (partialRotReported) {
+    return;
+  }
+  const dead = findDeadFeedSelectors(document, hostname, intensity);
+  if (dead.length === 0) {
+    return;
+  }
+  partialRotReported = true;
+  console.warn(
+    `[Cocoon] ${dead.length} feed selector(s) for ${hostname} no longer match anything, ` +
+      `though the feed is still being hidden by the rest. Please report this: ${dead.join(", ")}`
+  );
+}
+
 // Detects selector rot: if the effective selectors match nothing on a supported
 // host, tell the user the layout likely changed instead of failing silently.
 // Re-checks shortly after because social SPAs render their feed asynchronously.
@@ -318,6 +350,7 @@ function evaluateFeedBanner(hostname: string, intensity: FeedIntensity): void {
     }
 
     if (matched) {
+      reportPartialRot(hostname, intensity);
       if (!state.filteredShownAt) {
         setFeedBanner(`Cocoon: feed filtered on this site (${intensity}).`, "filtered");
         void markBannerState(hostname, { filteredShownAt: Date.now() });
