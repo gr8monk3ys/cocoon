@@ -139,7 +139,8 @@ describe("rule definitions", () => {
     for (const host of HOST_RULES) {
       const prefix = host.host.split(".")[0];
       for (const rule of host.rules) {
-        expect(rule.id, rule.id).toMatch(new RegExp(`^${prefix}[.][a-zA-Z]+$`));
+        expect(rule.id.startsWith(`${prefix}.`), rule.id).toBe(true);
+        expect(rule.id.slice(prefix.length + 1), rule.id).toMatch(/^[a-zA-Z]+$/);
       }
     }
   });
