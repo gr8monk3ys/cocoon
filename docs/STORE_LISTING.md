@@ -68,8 +68,8 @@ Copy/paste content for the Web Store developer dashboard. Keep this in sync with
 Published via GitHub Pages from `docs/` (see `.github/workflows/pages.yml`) on
 the default `github.io` domain:
 
-- Privacy: `https://gr8monk3ys.github.io/cocoon/privacy/`
-- Support: `https://gr8monk3ys.github.io/cocoon/support/`
+- Privacy: `https://cocoon.lscaturchio.xyz/privacy/`
+- Support: `https://cocoon.lscaturchio.xyz/support/`
 
 These serve over HTTPS with a GitHub-issued certificate and need no DNS setup.
 The `Pages` workflow deploys on every push to `main` that touches `docs/`, and
