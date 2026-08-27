@@ -9,11 +9,12 @@
     "test": "vitest run",
     "lint": "eslint .",
     "preview": "vite preview",
-    "check": "npm run lint && npm test && npm run build && npm audit --omit=dev --audit-level=moderate",
+    "check": "npm run lint && npm test && npm run build && npm run e2e && npm audit --omit=dev --audit-level=moderate",
     "icons": "python3 scripts/generate-icons.py",
     "package:extension": "node scripts/package-extension.mjs",
     "release:verify": "node scripts/package-extension.mjs",
-    "screenshots": "npm run build && node scripts/generate-store-screenshots.mjs"
+    "screenshots": "npm run build && node scripts/generate-store-screenshots.mjs",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "react": "^19.2.7",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/user-event": "^14.6.4",
     "@types/chrome": "^0.2.5",

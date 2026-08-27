@@ -31,7 +31,8 @@ Copy/paste content for the Web Store developer dashboard. Keep this in sync with
 > • Grounding overlay — a quick breathing + 5-4-3-2-1 grounding flow
 >
 > Supported sites: x.com / twitter.com, facebook.com, instagram.com,
-> youtube.com, reddit.com, tiktok.com.
+> youtube.com, reddit.com, tiktok.com. On Instagram and Facebook the strongest
+> setting also hides Reels, Stories, Explore/Watch and the suggestion rails.
 >
 > All settings are stored locally with chrome.storage.local and never leave your
 > browser.
@@ -116,5 +117,6 @@ HTTPS once the certificate issues.
 2. `npm run package:extension` → upload `artifacts/cocoon-v<version>.zip`.
 3. Load `dist/` unpacked and smoke-test each supported domain (feed cleaner,
    dark mode, reduced motion, grounding overlay) and the popup's current-site
-   control — see `docs/RELEASE.md`.
+   control. `npm run e2e` covers the feed cleaner against fixtures; the rest is
+   by hand.
 4. Confirm the toolbar icon renders (icons present in the zip).

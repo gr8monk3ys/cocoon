@@ -1,11 +1,18 @@
 import {
   buildFeedCleanerCss,
+  classifyPath,
   countFeedMatches,
   findDeadFeedSelectors,
+  getCheckableFeedRules,
+  getEffectiveFeedRules,
+  getHostRules,
+  PATH_ATTR,
   supportsFeedCleaner
 } from "./lib/feedRules";
+import { startMarkerObserver } from "./lib/marker";
 import { getFeedIntensityForHost, getSettings } from "./lib/settings";
 import type { CocoonMessage, CocoonSettings, FeedIntensity } from "./lib/types";
+import type { PageKind } from "./rules";
 
 let styleTag: HTMLStyleElement | null = null;
 let groundingOverlay: HTMLDivElement | null = null;
@@ -17,6 +24,8 @@ let feedBannerKind: BannerKind | null = null;
 let feedBannerDismissed = false;
 let feedCheckToken = 0;
 let partialRotReported = false;
+let stopMarkerObserver: (() => void) | null = null;
+let lastPathname: string | null = null;
 
 /**
  * Per-host banner history, persisted separately from settings so the
@@ -311,16 +320,16 @@ function setFeedBanner(message: string, kind: BannerKind): void {
  *
  * Deliberately not a banner. When one selector still matches, the feed is still
  * being hidden, so the feature is working from the user's point of view and a
- * warning would be pure noise. `docs/BRAND.md` treats an unnecessary banner as a
- * stressor, which is exactly the wrong thing to hand someone using a calm-focused
+ * warning would be pure noise. For a calm-focused extension an unnecessary
+ * banner is itself a stressor, which is exactly the wrong thing to hand someone using a calm-focused
  * extension. The audience for partial rot is whoever maintains `FEED_RULES`, so
  * it goes where a maintainer or bug reporter will look and a user never will.
  */
-function reportPartialRot(hostname: string, intensity: FeedIntensity): void {
+function reportPartialRot(hostname: string, intensity: FeedIntensity, path: PageKind): void {
   if (partialRotReported) {
     return;
   }
-  const dead = findDeadFeedSelectors(document, hostname, intensity);
+  const dead = findDeadFeedSelectors(document, hostname, intensity, path);
   if (dead.length === 0) {
     return;
   }
@@ -336,21 +345,21 @@ function reportPartialRot(hostname: string, intensity: FeedIntensity): void {
 // Re-checks shortly after because social SPAs render their feed asynchronously.
 // Persistence rules: the "feed filtered" confirmation shows once per host ever;
 // the rot warning shows until the user dismisses it, then stays dismissed.
-function evaluateFeedBanner(hostname: string, intensity: FeedIntensity): void {
+function evaluateFeedBanner(hostname: string, intensity: FeedIntensity, path: PageKind): void {
   const token = ++feedCheckToken;
 
   const check = async (): Promise<void> => {
     if (token !== feedCheckToken) {
       return; // superseded by a newer settings application
     }
-    const matched = countFeedMatches(document, hostname, intensity) > 0;
+    const matched = countFeedMatches(document, hostname, intensity, path) > 0;
     const state = (await readBannerState())[hostname] ?? {};
     if (token !== feedCheckToken) {
       return; // settings changed while we read storage
     }
 
     if (matched) {
-      reportPartialRot(hostname, intensity);
+      reportPartialRot(hostname, intensity, path);
       if (!state.filteredShownAt) {
         setFeedBanner(`Cocoon: feed filtered on this site (${intensity}).`, "filtered");
         void markBannerState(hostname, { filteredShownAt: Date.now() });
@@ -374,19 +383,55 @@ function evaluateFeedBanner(hostname: string, intensity: FeedIntensity): void {
   window.setTimeout(() => void check(), 4000);
 }
 
+/**
+ * Stamps the current page kind on <html>. Path-scoped rules in the generated
+ * CSS are gated on this attribute, so SPA navigation only has to move the
+ * attribute, never rebuild the stylesheet.
+ */
+function stampPath(hostname: string): PageKind {
+  const path = classifyPath(getHostRules(hostname), window.location.pathname);
+  document.documentElement.setAttribute(PATH_ATTR, path);
+  return path;
+}
+
 function applySettings(settings: CocoonSettings): void {
   currentSettings = settings;
   const style = ensureStyleTag();
   style.textContent = buildCss(settings);
 
   const hostname = window.location.hostname;
+  const path = stampPath(hostname);
+  lastPathname = window.location.pathname;
   const intensity = supportsFeedCleaner(hostname) ? getFeedIntensityForHost(settings, hostname) : "full";
-  if (intensity === "full") {
+
+  stopMarkerObserver?.();
+  stopMarkerObserver = null;
+  if (intensity !== "full") {
+    stopMarkerObserver = startMarkerObserver(getEffectiveFeedRules(hostname, intensity));
+  }
+
+  // Nothing to verify on this page (feed cleaner off, or every active rule is
+  // scoped to a different page kind): no banner either way.
+  if (intensity === "full" || getCheckableFeedRules(hostname, intensity, path).length === 0) {
     feedCheckToken++; // cancel any pending re-checks
     removeFeedBanner();
   } else {
-    evaluateFeedBanner(hostname, intensity);
+    evaluateFeedBanner(hostname, intensity, path);
   }
+}
+
+// Social sites are SPAs: the content script loads once and the URL then moves
+// under it. Content scripts cannot observe the page's own pushState, so poll
+// the pathname cheaply and re-apply when it changes (re-stamps the path
+// attribute and re-runs the rot check for the new page kind).
+function watchNavigation(): void {
+  const check = (): void => {
+    if (currentSettings && lastPathname !== null && window.location.pathname !== lastPathname) {
+      applySettings(currentSettings);
+    }
+  };
+  window.addEventListener("popstate", check);
+  window.setInterval(check, 750);
 }
 
 chrome.runtime.onMessage.addListener((message: CocoonMessage) => {
@@ -399,4 +444,5 @@ chrome.runtime.onMessage.addListener((message: CocoonMessage) => {
   }
 });
 
+watchNavigation();
 void getSettings().then(applySettings);
