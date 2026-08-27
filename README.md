@@ -85,6 +85,10 @@ audit runs informationally.
 
 ## Privacy baseline
 
+The published privacy policy and support page live on GitHub Pages:
+<https://gr8monk3ys.github.io/cocoon/privacy/> and
+<https://gr8monk3ys.github.io/cocoon/support/>.
+
 - No third-party advertising trackers
 - Settings remain local on device
 - No cloud transmission
