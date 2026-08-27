@@ -74,8 +74,8 @@ npm run package:extension   # zip dist/ for the store
 
 CI (`.github/workflows/ci.yml`) runs the same steps on every PR; CodeQL runs
 on push and monthly. Privacy policy and support pages are published from
-`docs/` to <https://gr8monk3ys.github.io/cocoon/privacy/> and
-<https://gr8monk3ys.github.io/cocoon/support/>; `docs/STORE_LISTING.md` is the
+`docs/` to <https://cocoon.lscaturchio.xyz/privacy/> and
+<https://cocoon.lscaturchio.xyz/support/>; `docs/STORE_LISTING.md` is the
 store submission kit.
 
 ## Layout
