@@ -35,13 +35,20 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Selector fixtures + the built extension loaded into a real Chromium.
+      - name: E2E (fixtures + built extension)
+        run: npm run e2e
+
       # Blocking gate covers what actually ships (production deps only), so a
       # new advisory in a dev-only transitive can't turn every push red.
       - name: Audit (production deps)
         run: npm audit --omit=dev --audit-level=moderate
 
       # Full-tree audit stays visible in logs but never blocks; dev-dep
-      # advisories are handled via Dependabot + the monthly security-baseline.
+      # advisories are handled via Dependabot.
       - name: Audit (all deps, informational)
         run: npm audit --audit-level=moderate
         continue-on-error: true

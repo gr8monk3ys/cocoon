@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest";
-import { countFeedMatches, findDeadFeedSelectors, getFeedSelectors } from "./feedRules";
+import { countFeedMatches, findDeadFeedSelectors, getCheckableFeedRules, getFeedSelectors } from "./feedRules";
 
 describe("countFeedMatches (selector-rot detection)", () => {
   afterEach(() => {
@@ -47,6 +47,23 @@ describe("countFeedMatches (selector-rot detection)", () => {
     document.body.innerHTML = "<div class='totally-different-layout'></div>";
     expect(countFeedMatches(document, "x.com", "none")).toBe(0);
     expect(findDeadFeedSelectors(document, "x.com", "none")).toEqual([]);
+  });
+
+  it("only checks rules that apply to the current page kind", () => {
+    // Instagram's feed rules are home-only. On a post page they are out of
+    // scope, so their absence is not rot — and the opened post is not counted.
+    document.body.innerHTML = "<main><article>the post the user opened</article></main>";
+    expect(countFeedMatches(document, "www.instagram.com", "limited", "home")).toBe(1);
+    expect(countFeedMatches(document, "www.instagram.com", "limited", "post")).toBe(0);
+    expect(getCheckableFeedRules("www.instagram.com", "limited", "post")).toEqual([]);
+  });
+
+  it("ignores mayBeAbsent rules when looking for dead selectors", () => {
+    // Facebook's legacy role="feed" is expected to be missing on the current
+    // layout; the marked container is what proves the feed was found.
+    document.body.innerHTML = '<div role="main"><div data-cocoon-unit="facebook.feedPosts"><h3>Feed posts</h3></div></div>';
+    expect(countFeedMatches(document, "www.facebook.com", "limited", "home")).toBe(1);
+    expect(findDeadFeedSelectors(document, "www.facebook.com", "limited", "home")).toEqual([]);
   });
 
   it("does not match a Reddit post page at any intensity", () => {
