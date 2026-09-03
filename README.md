@@ -41,13 +41,17 @@ it applies to:
 { id: "instagram.feedPosts", intensity: "limited", selector: "main article", paths: ["home"] }
 ```
 
-From that list the content script generates the stylesheet it injects
-(`src/lib/feedRules.ts`), gated on a `data-cocoon-path` attribute it stamps on
-`<html>` and re-stamps as the SPA navigates, so an opened Instagram post is
-never hidden by the home-feed rule. The same list drives the selector-rot
-check (rules flagged `mayBeAbsent` are excused), the manifest host-permission
-consistency test, and the e2e suite: `e2e/fixtures/<host>.html` mirrors each
-site's live markup, and `npm run e2e` checks every rule matches its fixture,
+From that list `planPage` (`src/lib/pagePlan.ts`) computes a **page plan** —
+one pure call that resolves the host, applies any per-site override,
+classifies the page kind and returns the stylesheet to inject, the rules to
+mark, and the rules whose absence would mean rot. `src/lib/pageDom.ts` is the
+only module that then touches the page. Path-scoped rules are gated on a
+`data-cocoon-path` attribute stamped on `<html>` and re-stamped as the SPA
+navigates, so an opened Instagram post is never hidden by the home-feed rule.
+The same plan drives the selector-rot check (rules flagged `mayBeAbsent` are
+excused), the manifest host-permission consistency test, and the e2e suite:
+`e2e/fixtures/<host>.html` mirrors each site's live markup, and `npm run e2e`
+checks every rule matches its fixture,
 the generated CSS parses in Chromium with zero dropped rules, and then loads
 the **built** extension into Chromium with each fixture served at the real
 host URL and asserts the feed is actually hidden. Fixtures are hand-written
@@ -82,11 +86,18 @@ store submission kit.
 
 - `public/manifest.json` — MV3 manifest; hosts must match `src/rules`
 - `src/rules/` — per-host feed rules (the thing to edit when a site changes)
-- `src/lib/feedRules.ts` — rule → CSS generator, path classifier, rot detection
+- `src/lib/pagePlan.ts` — `planPage()`: the whole page decision, pure
+- `src/lib/pageDom.ts` — the only module that writes to the page
 - `src/lib/marker.ts` — MutationObserver that stamps text-identified units
-- `src/content.ts` — injects CSS, stamps the path, banner, grounding dialog
-- `src/popup/`, `src/options/` — React UIs; `src/lib/settings.ts` — typed settings
+- `src/lib/banner.ts`, `src/lib/grounding.ts` — the two in-page UI surfaces
+- `src/lib/settings.ts` — typed settings; `commitSettings()` is the one write path
+- `src/lib/store.ts` — every `chrome.storage` read and write
+- `src/content.ts` — bootstrap: plan on load, re-plan as the SPA navigates
+- `src/popup/`, `src/options/` — React UIs
 - `e2e/` — fixtures and Playwright specs
+
+`CONTEXT.md` defines the domain terms used throughout (intensity, override,
+page kind, marker, rot, page plan, commit).
 
 ## License
 

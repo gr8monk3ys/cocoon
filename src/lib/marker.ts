@@ -1,26 +1,37 @@
 import { UNIT_ATTR, type FeedRule, type MarkerConfig } from "../rules";
 
-function addToken(element: Element, token: string): boolean {
-  const tokens = (element.getAttribute(UNIT_ATTR) ?? "").split(/\s+/).filter(Boolean);
-  if (tokens.includes(token)) {
-    return false;
-  }
-  element.setAttribute(UNIT_ATTR, [...tokens, token].join(" "));
-  return true;
+export interface MarkRequest {
+  ruleId: string;
+  cfg: MarkerConfig;
+  /** Attribute to stamp; always `UNIT_ATTR` in production. */
+  unitAttr: string;
 }
 
 /**
  * Stamps `data-cocoon-unit="<ruleId>"` on every unit inside a container whose
- * text contains one of the anchors. Returns how many were newly marked.
+ * text contains one of the anchors, appending to any tokens already there.
+ * Returns how many were newly marked.
+ *
+ * Deliberately self-contained: no imports, no closure, exactly one argument.
+ * The fixture e2e serializes this function's source into a page that has no
+ * bundle (`page.evaluate`), so a free variable here would become a
+ * ReferenceError there — and the suite would go back to keeping its own,
+ * divergent copy of the algorithm.
  */
-export function markUnits(root: ParentNode, ruleId: string, cfg: MarkerConfig): number {
+export function markUnits({ ruleId, cfg, unitAttr }: MarkRequest): number {
   let marked = 0;
-  for (const container of root.querySelectorAll(cfg.containerSelector)) {
+  for (const container of document.querySelectorAll(cfg.containerSelector)) {
     for (const unit of container.querySelectorAll(cfg.unitSelector)) {
       const text = unit.textContent ?? "";
-      if (cfg.textAnchors.some((anchor) => text.includes(anchor)) && addToken(unit, ruleId)) {
-        marked += 1;
+      if (!cfg.textAnchors.some((anchor) => text.includes(anchor))) {
+        continue;
       }
+      const tokens = (unit.getAttribute(unitAttr) ?? "").split(/\s+/).filter(Boolean);
+      if (tokens.includes(ruleId)) {
+        continue;
+      }
+      unit.setAttribute(unitAttr, [...tokens, ruleId].join(" "));
+      marked += 1;
     }
   }
   return marked;
@@ -39,7 +50,7 @@ export function startMarkerObserver(rules: FeedRule[]): () => void {
   let timer: number | undefined;
   const scan = (): void => {
     for (const rule of markable) {
-      markUnits(document, rule.id, rule.mark);
+      markUnits({ ruleId: rule.id, cfg: rule.mark, unitAttr: UNIT_ATTR });
     }
   };
   const observer = new MutationObserver(() => {

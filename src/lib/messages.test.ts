@@ -1,16 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { broadcastSettings, openGroundingInActiveTab } from "./messages";
+import { createChromeMock } from "../test/chromeMock";
+import { broadcastSettings, getActiveTabHostname, openGroundingInActiveTab } from "./messages";
 import { applyProfile } from "./settings";
 
-type Tab = { id?: number };
-
-function createChromeMock(tabs: Tab[]): typeof chrome {
-  return {
-    tabs: {
-      query: vi.fn(async () => tabs),
-      sendMessage: vi.fn(async () => undefined)
-    }
-  } as unknown as typeof chrome;
+function withTabs(tabs: Array<{ id?: number; url?: string }>): void {
+  vi.stubGlobal("chrome", createChromeMock({ tabs }).chrome);
 }
 
 describe("messages", () => {
@@ -19,8 +13,7 @@ describe("messages", () => {
   });
 
   it("broadcasts settings to tabs with numeric ids", async () => {
-    const chromeMock = createChromeMock([{ id: 1 }, {}, { id: 2 }]);
-    vi.stubGlobal("chrome", chromeMock);
+    withTabs([{ id: 1 }, {}, { id: 2 }]);
 
     await broadcastSettings(applyProfile("adhd"));
 
@@ -28,14 +21,23 @@ describe("messages", () => {
   });
 
   it("opens grounding only when active tab has id", async () => {
-    const chromeMock = createChromeMock([{}]);
-    vi.stubGlobal("chrome", chromeMock);
-
+    withTabs([{}]);
     await openGroundingInActiveTab();
     expect(chrome.tabs.sendMessage).toHaveBeenCalledTimes(0);
 
-    vi.stubGlobal("chrome", createChromeMock([{ id: 9 }]));
+    withTabs([{ id: 9 }]);
     await openGroundingInActiveTab();
     expect(chrome.tabs.sendMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it("reads the active tab's hostname, and null when there isn't one", async () => {
+    withTabs([{ id: 1, url: "https://www.reddit.com/r/test" }]);
+    expect(await getActiveTabHostname()).toBe("www.reddit.com");
+
+    withTabs([{ id: 1 }]);
+    expect(await getActiveTabHostname()).toBeNull();
+
+    withTabs([{ id: 1, url: "not a url" }]);
+    expect(await getActiveTabHostname()).toBeNull();
   });
 });

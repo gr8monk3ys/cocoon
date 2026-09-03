@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createChromeMock } from "./test/chromeMock";
 import { DEFAULT_SETTINGS, type CocoonSettings } from "./lib/types";
 
 function expiredScenarioSettings(): CocoonSettings {
@@ -22,40 +23,12 @@ function expiredScenarioSettings(): CocoonSettings {
   };
 }
 
-function makeChrome(initial: CocoonSettings) {
-  const store: { settings: CocoonSettings } = { settings: initial };
-  let alarmListener: ((alarm: { name: string }) => void) | undefined;
+function makeEnv() {
+  return createChromeMock({ store: { settings: expiredScenarioSettings() } });
+}
 
-  const chromeMock = {
-    storage: {
-      local: {
-        get: vi.fn(async (key: string) => ({ [key]: store.settings })),
-        set: vi.fn(async (obj: { settings: CocoonSettings }) => {
-          store.settings = obj.settings;
-        })
-      },
-      onChanged: { addListener: vi.fn() }
-    },
-    alarms: {
-      clear: vi.fn(async () => undefined),
-      create: vi.fn(async () => undefined),
-      onAlarm: {
-        addListener: vi.fn((cb: (alarm: { name: string }) => void) => {
-          alarmListener = cb;
-        })
-      }
-    },
-    runtime: {
-      onInstalled: { addListener: vi.fn() },
-      onStartup: { addListener: vi.fn() }
-    },
-    tabs: {
-      query: vi.fn(async () => [{ id: 1 }]),
-      sendMessage: vi.fn(async () => undefined)
-    }
-  } as unknown as typeof chrome;
-
-  return { chromeMock, store, fireAlarm: (name: string) => alarmListener?.({ name }) };
+function storedSettings(store: Record<string, unknown>): CocoonSettings {
+  return store.settings as CocoonSettings;
 }
 
 describe("background scenario expiry", () => {
@@ -65,8 +38,8 @@ describe("background scenario expiry", () => {
   });
 
   it("restores baseline settings and broadcasts when the scenario alarm fires", async () => {
-    const env = makeChrome(expiredScenarioSettings());
-    vi.stubGlobal("chrome", env.chromeMock);
+    const env = makeEnv();
+    vi.stubGlobal("chrome", env.chrome);
 
     await import("./background");
 
@@ -74,23 +47,22 @@ describe("background scenario expiry", () => {
     env.store.settings = expiredScenarioSettings();
     env.fireAlarm("cocoon-scenario-expiry");
 
-    await vi.waitFor(() => expect(env.store.settings.activeScenario).toBeNull());
-    expect(env.store.settings.profile).toBe("adhd");
-    expect(env.store.settings.feedIntensity).toBe("limited");
-    expect(env.chromeMock.tabs.sendMessage).toHaveBeenCalled();
+    await vi.waitFor(() => expect(storedSettings(env.store).activeScenario).toBeNull());
+    expect(storedSettings(env.store).profile).toBe("adhd");
+    expect(storedSettings(env.store).feedIntensity).toBe("limited");
+    expect(env.chrome.tabs.sendMessage).toHaveBeenCalled();
   });
 
   it("ignores unrelated alarms", async () => {
-    const env = makeChrome(expiredScenarioSettings());
-    vi.stubGlobal("chrome", env.chromeMock);
+    const env = makeEnv();
+    vi.stubGlobal("chrome", env.chrome);
     await import("./background");
 
     env.store.settings = expiredScenarioSettings();
-    env.chromeMock.storage.local.set = vi.fn(async () => undefined);
     env.fireAlarm("some-other-alarm");
 
     // Give any stray async work a chance to run, then assert nothing changed.
     await new Promise((resolve) => setTimeout(resolve, 10));
-    expect(env.store.settings.activeScenario).not.toBeNull();
+    expect(storedSettings(env.store).activeScenario).not.toBeNull();
   });
 });
