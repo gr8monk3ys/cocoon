@@ -8,51 +8,90 @@
     <link rel="stylesheet" href="../assets/site.css" />
   </head>
   <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="../">
+          <img src="../assets/icon-128.png" alt="" />
+          <span>Cocoon</span>
+        </a>
+        <nav class="site-nav" aria-label="Site">
+          <a href="../">Home</a>
+          <a href="../privacy/">Privacy Policy</a>
+          <a href="../support/" aria-current="page">Support</a>
+        </nav>
+      </div>
+    </header>
+
     <main>
-      <header>
-        <img src="../assets/icon-128.png" alt="Cocoon logo" />
-        <div>
+      <div class="wrap">
+        <section class="hero">
           <h1>Support</h1>
-          <p class="subtitle">How to report issues and what to include.</p>
-        </div>
-      </header>
-      <div class="brand-rule"></div>
+          <p class="subtitle measure">How to install Cocoon, report issues, and what to include.</p>
+          <div class="brand-rule"></div>
+        </section>
 
-      <nav>
-        <a class="pill" href="../">Home</a>
-        <a class="pill" href="../privacy/">Privacy Policy</a>
-      </nav>
+        <section class="card" id="install">
+          <h2>Install Cocoon</h2>
+          <p class="measure">
+            Cocoon is not on the Chrome Web Store yet, so it installs from source. It takes about a minute and needs
+            Node and Chrome.
+          </p>
+          <ol class="measure">
+            <li>Clone <a href="https://github.com/gr8monk3ys/cocoon">github.com/gr8monk3ys/cocoon</a>.</li>
+            <li>Run <code>npm install &amp;&amp; npm run build</code> to produce <code>dist/</code>.</li>
+            <li>Open <code>chrome://extensions</code> and turn on <strong>Developer mode</strong>.</li>
+            <li>Choose <strong>Load unpacked</strong> and pick the <code>dist/</code> folder.</li>
+          </ol>
+          <p class="meta measure">
+            Nothing is sent anywhere during install or after it. When the Web Store listing goes live this page will
+            link to it instead.
+          </p>
+        </section>
 
-      <section class="card">
-        <h2>Report an Issue</h2>
-        <p>When filing a bug, include:</p>
-        <ol>
-          <li>Cocoon version (from <code>manifest.json</code> in the extension)</li>
-          <li>Browser version</li>
-          <li>Affected website domain</li>
-          <li>Which toggles were enabled</li>
-          <li>Steps to reproduce</li>
-          <li>Expected vs actual behavior</li>
-        </ol>
-      </section>
+        <section class="card">
+          <h2>Report an Issue</h2>
+          <p>When filing a bug, include:</p>
+          <ol>
+            <li>Cocoon version (from <code>manifest.json</code> in the extension)</li>
+            <li>Browser version</li>
+            <li>Affected website domain</li>
+            <li>Which toggles were enabled</li>
+            <li>Steps to reproduce</li>
+            <li>Expected vs actual behavior</li>
+          </ol>
+        </section>
 
-      <section class="card">
-        <h2>Known Limitations</h2>
-        <ul>
-          <li>Social platform DOM changes may break feed selectors until rules are updated.</li>
-          <li>Per-site overrides apply only to supported social domains.</li>
-          <li>Grounding overlay is intentionally lightweight and not a clinical intervention.</li>
-        </ul>
-      </section>
+        <section class="card">
+          <h2>Known Limitations</h2>
+          <ul>
+            <li>Social platform DOM changes may break feed selectors until rules are updated.</li>
+            <li>Per-site overrides apply only to supported social domains.</li>
+            <li>Grounding overlay is intentionally lightweight and not a clinical intervention.</li>
+          </ul>
+        </section>
 
-      <section class="card">
-        <h2>Safety Note</h2>
-        <p>
-          Cocoon is a supportive accessibility and wellbeing tool and is <strong>not</strong> a substitute for
-          professional medical or mental health care.
-        </p>
-        <p>If you are in immediate danger or crisis, contact local emergency services or your regional crisis line.</p>
-      </section>
+        <section class="card">
+          <h2>Safety Note</h2>
+          <p>
+            Cocoon is a supportive accessibility and wellbeing tool and is <strong>not</strong> a substitute for
+            professional medical or mental health care.
+          </p>
+          <p>If you are in immediate danger or crisis, contact local emergency services or your regional crisis line.</p>
+        </section>
+      </div>
     </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <nav aria-label="Footer">
+          <a href="../">Home</a>
+          <a href="../privacy/">Privacy Policy</a>
+          <a href="../support/">Support</a>
+          <a href="https://github.com/gr8monk3ys/cocoon">Source on GitHub</a>
+        </nav>
+        <p>This site accompanies the Chrome Web Store listing and user documentation.</p>
+        <p>&copy; 2026 Cocoon. No accounts, no analytics, no cloud.</p>
+      </div>
+    </footer>
   </body>
 </html>
