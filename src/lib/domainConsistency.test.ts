@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import manifest from "../../public/manifest.json";
-import { SOCIAL_HOSTS } from "./feedRules";
+import { SOCIAL_HOSTS } from "./pagePlan";
 
 function permissionHostToDomain(hostPermission: string): string {
   return hostPermission.replace("https://*.", "").replace("/*", "");

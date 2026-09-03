@@ -1,20 +1,20 @@
 import { createRoot } from "react-dom/client";
 import React, { useEffect, useState } from "react";
-import { SOCIAL_HOSTS, supportsFeedCleaner } from "../lib/feedRules";
+import { SOCIAL_HOSTS, supportsFeedCleaner } from "../lib/pagePlan";
 import {
   applyProfile,
   applyScenario,
+  commitSettings,
   getSettings,
+  manualEdit,
   normalizeHostname,
   removeDomainRule,
   removeScheduleRule,
   removeSiteFeedCleanerOverride,
-  saveSettings,
   upsertDomainRule,
   upsertScheduleRule,
   updateSiteFeedCleanerOverride
 } from "../lib/settings";
-import { broadcastSettings } from "../lib/messages";
 import type {
   AdaptiveScheduleRule,
   CocoonProfile,
@@ -22,6 +22,7 @@ import type {
   FeedIntensity,
   ScenarioType
 } from "../lib/types";
+import { SCENARIOS, SCENARIO_DURATIONS } from "../ui/scenarios";
 import "../ui/theme.css";
 
 /** Coerce a number-input value to a valid hour (0–23); empty/NaN becomes 0. */
@@ -34,15 +35,6 @@ function clampHour(value: string): number {
 }
 
 const SUPPORTED_DOMAINS_HINT = SOCIAL_HOSTS.join(", ");
-
-const SCENARIOS: Array<{ label: string; value: ScenarioType }> = [
-  { label: "Focus session", value: "focus_session" },
-  { label: "Low stimulation", value: "low_stimulation" },
-  { label: "Calm reset", value: "calm_reset" },
-  { label: "Social guardrails", value: "social_guardrails" }
-];
-
-const SCENARIO_DURATIONS = [15, 30, 60] as const;
 
 function OptionsApp(): React.JSX.Element {
   const [settings, setSettings] = useState<CocoonSettings | null>(null);
@@ -75,9 +67,7 @@ function OptionsApp(): React.JSX.Element {
   }
 
   const update = async (next: CocoonSettings): Promise<void> => {
-    setSettings(next);
-    await saveSettings(next);
-    await broadcastSettings(next);
+    setSettings(await commitSettings(next));
     setSaved(true);
   };
 
@@ -86,7 +76,7 @@ function OptionsApp(): React.JSX.Element {
   };
 
   const onFeedIntensityChange = async (feedIntensity: FeedIntensity): Promise<void> => {
-    await update({ ...settings, profile: "custom", feedIntensity, hideAlgorithmicFeeds: feedIntensity !== "full" });
+    await update(manualEdit(settings, { feedIntensity }));
   };
 
   const validateSupportedHost = (raw: string): string | null => {
@@ -109,14 +99,13 @@ function OptionsApp(): React.JSX.Element {
     }
 
     setOverrideError("");
-    const next = updateSiteFeedCleanerOverride(settings, normalized, overrideEnabled);
-    await update({ ...next, profile: "custom" });
+    await update(manualEdit(updateSiteFeedCleanerOverride(settings, normalized, overrideEnabled)));
     setHostnameInput("");
     setOverrideEnabled(true);
   };
 
   const removeOverride = async (hostname: string): Promise<void> => {
-    await update({ ...removeSiteFeedCleanerOverride(settings, hostname), profile: "custom" });
+    await update(manualEdit(removeSiteFeedCleanerOverride(settings, hostname)));
   };
 
   const applyScenarioNow = async (scenario: ScenarioType): Promise<void> => {
@@ -135,7 +124,7 @@ function OptionsApp(): React.JSX.Element {
     }
 
     setDomainRuleError("");
-    await update({ ...upsertDomainRule(settings, normalized, domainRuleProfile), profile: "custom" });
+    await update(manualEdit(upsertDomainRule(settings, normalized, domainRuleProfile)));
     setDomainRuleHost("");
   };
 
@@ -146,7 +135,7 @@ function OptionsApp(): React.JSX.Element {
     }
 
     setScheduleError("");
-    await update({ ...upsertScheduleRule(settings, scheduleRule), profile: "custom" });
+    await update(manualEdit(upsertScheduleRule(settings, scheduleRule)));
   };
 
   const sortedOverrides = Object.entries(settings.siteFeedCleanerOverrides).sort(([a], [b]) => a.localeCompare(b));
@@ -191,7 +180,7 @@ function OptionsApp(): React.JSX.Element {
           <input
             type="checkbox"
             checked={settings.darkMode}
-            onChange={() => void update({ ...settings, profile: "custom", darkMode: !settings.darkMode })}
+            onChange={() => void update(manualEdit(settings, { darkMode: !settings.darkMode }))}
           />
           Dark mode
         </label>
@@ -203,7 +192,7 @@ function OptionsApp(): React.JSX.Element {
           <input
             type="checkbox"
             checked={settings.reduceMotion}
-            onChange={() => void update({ ...settings, profile: "custom", reduceMotion: !settings.reduceMotion })}
+            onChange={() => void update(manualEdit(settings, { reduceMotion: !settings.reduceMotion }))}
           />
           Reduce motion
         </label>
@@ -212,7 +201,7 @@ function OptionsApp(): React.JSX.Element {
             type="checkbox"
             checked={settings.enableGroundingTool}
             onChange={() =>
-              void update({ ...settings, profile: "custom", enableGroundingTool: !settings.enableGroundingTool })
+              void update(manualEdit(settings, { enableGroundingTool: !settings.enableGroundingTool }))
             }
           />
           Enable grounding tool
@@ -250,7 +239,7 @@ function OptionsApp(): React.JSX.Element {
             type="checkbox"
             checked={settings.adaptive.enabled}
             onChange={() =>
-              void update({ ...settings, profile: "custom", adaptive: { ...settings.adaptive, enabled: !settings.adaptive.enabled } })
+              void update(manualEdit(settings, { adaptive: { ...settings.adaptive, enabled: !settings.adaptive.enabled } }))
             }
           />
           Enable adaptive suggestions
@@ -260,11 +249,9 @@ function OptionsApp(): React.JSX.Element {
             type="checkbox"
             checked={settings.adaptive.suggestOnly}
             onChange={() =>
-              void update({
-                ...settings,
-                profile: "custom",
-                adaptive: { ...settings.adaptive, suggestOnly: !settings.adaptive.suggestOnly }
-              })
+              void update(
+                manualEdit(settings, { adaptive: { ...settings.adaptive, suggestOnly: !settings.adaptive.suggestOnly } })
+              )
             }
           />
           Suggest, don’t force
@@ -298,7 +285,7 @@ function OptionsApp(): React.JSX.Element {
           {sortedDomainRules.map(([hostname, profile]) => (
             <li key={hostname}>
               {hostname} → {profile}
-              <button type="button" className="btn btn-small" onClick={() => void update(removeDomainRule(settings, hostname))}>
+              <button type="button" className="btn btn-small" onClick={() => void update(manualEdit(removeDomainRule(settings, hostname)))}>
                 Remove
               </button>
             </li>
@@ -346,7 +333,7 @@ function OptionsApp(): React.JSX.Element {
           {settings.adaptive.scheduleRules.map((rule, index) => (
             <li key={`${rule.profile}-${index}`}>
               {rule.startHour}:00-{rule.endHour}:00 → {rule.profile}
-              <button type="button" className="btn btn-small" onClick={() => void update(removeScheduleRule(settings, index))}>
+              <button type="button" className="btn btn-small" onClick={() => void update(manualEdit(removeScheduleRule(settings, index)))}>
                 Remove
               </button>
             </li>
@@ -356,7 +343,7 @@ function OptionsApp(): React.JSX.Element {
 
       <section className="card">
         <h2>Per-site feed cleaner overrides</h2>
-        <p className="site-line">Supported domains: x/twitter, facebook/instagram, youtube, reddit, tiktok.</p>
+        <p className="site-line">Supported domains: {SUPPORTED_DOMAINS_HINT}.</p>
 
         <div className="inline-form host-row">
           <input

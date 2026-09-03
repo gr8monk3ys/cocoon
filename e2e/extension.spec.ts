@@ -3,6 +3,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { hostRulesFor, planPage } from "../src/lib/pagePlan";
+import { DEFAULT_SETTINGS } from "../src/lib/types";
 import { HOST_RULES, ruleSelector } from "../src/rules";
 
 /**
@@ -30,7 +32,9 @@ test.beforeAll(async () => {
   // else is allowed out.
   await context.route("**/*", async (route) => {
     const url = new URL(route.request().url());
-    const host = HOST_RULES.find((h) => url.hostname.endsWith(h.host));
+    // Alias-aware, and does not match a host that merely *ends with* a
+    // supported name — which the inline `endsWith` here used to.
+    const host = hostRulesFor(url.hostname);
     if (host && route.request().resourceType() === "document") {
       await route.fulfill({
         contentType: "text/html",
@@ -59,11 +63,9 @@ for (const host of HOST_RULES) {
     await expect(page.locator("style#cocoon-style")).toHaveCount(1);
     await expect(page.locator("html")).toHaveAttribute("data-cocoon-path", "home");
 
-    // DEFAULT_SETTINGS.feedIntensity is "limited": every gentle rule that
-    // applies on the home page must be hidden.
-    const gentle = host.rules.filter(
-      (r) => r.intensity === "limited" && !r.mayBeAbsent && (!r.paths || r.paths.includes("home"))
-    );
+    // The plan the content script itself computes for this page at the default
+    // settings: every rule whose absence would mean rot must be hidden.
+    const gentle = planPage(host.host, "/", DEFAULT_SETTINGS).checkableRules;
     expect(gentle.length).toBeGreaterThan(0);
     for (const rule of gentle) {
       await expect(page.locator(ruleSelector(rule)).first(), rule.id).toBeAttached();
