@@ -27,3 +27,22 @@ export async function openGroundingInActiveTab(): Promise<void> {
     // domain). Nothing to open there; ignore rather than rejecting.
   }
 }
+
+/**
+ * Hostname of the tab the user is looking at, or null when there isn't one
+ * (a chrome:// page, a tab with no URL). Raw, as the tab reports it; callers
+ * normalize. This module owns every `chrome.tabs` call, so the popup does not
+ * repeat the active-tab query.
+ */
+export async function getActiveTabHostname(): Promise<string | null> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.url) {
+    return null;
+  }
+
+  try {
+    return new URL(tab.url).hostname;
+  } catch {
+    return null;
+  }
+}

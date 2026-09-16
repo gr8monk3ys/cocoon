@@ -1,42 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { supportsFeedCleaner } from "../lib/feedRules";
+import { supportsFeedCleaner } from "../lib/pagePlan";
 import {
   applyProfile,
   applyScenario,
+  commitSettings,
   getAdaptiveProfileSuggestion,
-  getFeedIntensityForHost,
+  isFeedCleanerEnabledForHost,
   getSettings,
+  manualEdit,
   normalizeHostname,
   removeSiteFeedCleanerOverride,
-  saveSettings,
   updateSiteFeedCleanerOverride
 } from "../lib/settings";
-import { broadcastSettings, openGroundingInActiveTab } from "../lib/messages";
+import { getActiveTabHostname, openGroundingInActiveTab } from "../lib/messages";
 import type { CocoonProfile, CocoonSettings, FeedIntensity, ScenarioType } from "../lib/types";
+import { SCENARIOS, SCENARIO_DURATIONS } from "../ui/scenarios";
 import "../ui/theme.css";
-
-async function getActiveHostname(): Promise<string | null> {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.url) {
-    return null;
-  }
-
-  try {
-    return normalizeHostname(new URL(tab.url).hostname);
-  } catch {
-    return null;
-  }
-}
-
-const SCENARIOS: Array<{ label: string; value: ScenarioType }> = [
-  { label: "Focus", value: "focus_session" },
-  { label: "Low stimulation", value: "low_stimulation" },
-  { label: "Calm reset", value: "calm_reset" },
-  { label: "Social guardrails", value: "social_guardrails" }
-];
-
-const SCENARIO_DURATIONS = [15, 30, 60] as const;
 
 function PopupApp(): React.JSX.Element {
   const [settings, setSettings] = useState<CocoonSettings | null>(null);
@@ -45,7 +25,7 @@ function PopupApp(): React.JSX.Element {
 
   useEffect(() => {
     void getSettings().then(setSettings);
-    void getActiveHostname().then(setActiveHostname);
+    void getActiveTabHostname().then((hostname) => setActiveHostname(hostname && normalizeHostname(hostname)));
   }, []);
 
   // When adaptive is enabled and the user opted out of suggest-only mode,
@@ -70,7 +50,7 @@ function PopupApp(): React.JSX.Element {
     const next = applyProfile(suggested, settings);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional ref-guarded one-shot per hostname; persists + broadcasts, cannot cascade
     setSettings(next);
-    void saveSettings(next).then(() => broadcastSettings(next));
+    void commitSettings(next);
   }, [settings, activeHostname]);
 
   if (!settings) {
@@ -78,9 +58,7 @@ function PopupApp(): React.JSX.Element {
   }
 
   const update = async (next: CocoonSettings): Promise<void> => {
-    setSettings(next);
-    await saveSettings(next);
-    await broadcastSettings(next);
+    setSettings(await commitSettings(next));
   };
 
   const setProfile = async (profile: CocoonProfile): Promise<void> => {
@@ -90,11 +68,11 @@ function PopupApp(): React.JSX.Element {
   const toggle =
     (field: keyof Omit<CocoonSettings, "profile" | "siteFeedCleanerOverrides" | "adaptive" | "activeScenario">) =>
     async (): Promise<void> => {
-      await update({ ...settings, profile: "custom", [field]: !settings[field] });
+      await update(manualEdit(settings, { [field]: !settings[field] }));
     };
 
-  const updateIntensity = async (intensity: FeedIntensity): Promise<void> => {
-    await update({ ...settings, profile: "custom", feedIntensity: intensity, hideAlgorithmicFeeds: intensity !== "full" });
+  const updateIntensity = async (feedIntensity: FeedIntensity): Promise<void> => {
+    await update(manualEdit(settings, { feedIntensity }));
   };
 
   const applyScenarioNow = async (scenario: ScenarioType): Promise<void> => {
@@ -106,9 +84,8 @@ function PopupApp(): React.JSX.Element {
       return;
     }
 
-    const intensity = getFeedIntensityForHost(settings, activeHostname);
-    const next = updateSiteFeedCleanerOverride(settings, activeHostname, intensity === "full");
-    await update({ ...next, profile: "custom" });
+    const enabled = isFeedCleanerEnabledForHost(settings, activeHostname);
+    await update(manualEdit(updateSiteFeedCleanerOverride(settings, activeHostname, !enabled)));
   };
 
   const resetCurrentSite = async (): Promise<void> => {
@@ -116,12 +93,11 @@ function PopupApp(): React.JSX.Element {
       return;
     }
 
-    const next = removeSiteFeedCleanerOverride(settings, activeHostname);
-    await update({ ...next, profile: "custom" });
+    await update(manualEdit(removeSiteFeedCleanerOverride(settings, activeHostname)));
   };
 
   const activeSiteSupported = Boolean(activeHostname && supportsFeedCleaner(activeHostname));
-  const currentSiteIntensity = activeHostname ? getFeedIntensityForHost(settings, activeHostname) : "full";
+  const cleanerOnHere = activeHostname ? isFeedCleanerEnabledForHost(settings, activeHostname) : false;
   const suggestion = activeHostname ? getAdaptiveProfileSuggestion(settings, activeHostname) : null;
 
   return (
@@ -202,7 +178,7 @@ function PopupApp(): React.JSX.Element {
         {activeSiteSupported ? (
           <>
             <label className="checkbox-row">
-              <input type="checkbox" checked={currentSiteIntensity !== "full"} onChange={() => void toggleCurrentSite()} />
+              <input type="checkbox" checked={cleanerOnHere} onChange={() => void toggleCurrentSite()} />
               Enable feed cleaner on this site
             </label>
             <button type="button" className="btn btn-block" onClick={() => void resetCurrentSite()}>

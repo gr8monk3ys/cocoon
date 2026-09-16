@@ -8,11 +8,16 @@ import {
   type ScenarioRestoreSnapshot,
   type ScenarioType
 } from "./types";
-
-const STORAGE_KEY = "settings";
+import { broadcastSettings } from "./messages";
+import { settingsStore } from "./store";
 
 export function normalizeHostname(hostname: string): string {
   return hostname.trim().toLowerCase().replace(/\.$/, "");
+}
+
+/** Keeps the legacy `hideAlgorithmicFeeds` mirror in step with `feedIntensity`. */
+function withDerived(settings: CocoonSettings): CocoonSettings {
+  return { ...settings, hideAlgorithmicFeeds: settings.feedIntensity !== "full" };
 }
 
 export function applyProfile(profile: CocoonProfile, current?: CocoonSettings): CocoonSettings {
@@ -178,13 +183,8 @@ export function applyScenario(
     hideAlgorithmicFeeds: settings.hideAlgorithmicFeeds,
     enableGroundingTool: settings.enableGroundingTool
   };
-  const patched = { ...settings, ...scenarioPatch(type), profile: "custom" as const };
-  return {
-    ...patched,
-    // Keep the legacy mirror in sync with the patched intensity.
-    hideAlgorithmicFeeds: patched.feedIntensity !== "full",
-    activeScenario: { type, expiresAt, previous }
-  };
+  const patched = withDerived({ ...settings, ...scenarioPatch(type), profile: "custom" as const });
+  return { ...patched, activeScenario: { type, expiresAt, previous } };
 }
 
 export function clearExpiredScenario(settings: CocoonSettings, now: number = Date.now()): CocoonSettings {
@@ -224,8 +224,7 @@ function migrateSettings(raw: Partial<CocoonSettings> | undefined): CocoonSettin
 
 /** Reads + migrates stored settings WITHOUT clearing an expired scenario. */
 export async function readStoredSettings(): Promise<CocoonSettings> {
-  const result = await chrome.storage.local.get(STORAGE_KEY);
-  return migrateSettings(result[STORAGE_KEY] as Partial<CocoonSettings> | undefined);
+  return migrateSettings(await settingsStore.read());
 }
 
 export async function getSettings(): Promise<CocoonSettings> {
@@ -233,14 +232,26 @@ export async function getSettings(): Promise<CocoonSettings> {
 }
 
 export async function saveSettings(settings: CocoonSettings): Promise<void> {
-  await chrome.storage.local.set({ [STORAGE_KEY]: settings });
+  await settingsStore.write(settings);
 }
 
-export async function updateSettings(
-  updater: (current: CocoonSettings) => CocoonSettings
-): Promise<CocoonSettings> {
-  const current = await getSettings();
-  const next = updater(current);
-  await saveSettings(next);
-  return next;
+/**
+ * Applies a hand edit. Two rules hold for every one of them, and both used to
+ * be copied into each call site (fourteen times, already drifting): leaving a
+ * preset moves the profile to "custom", and `hideAlgorithmicFeeds` is derived,
+ * never set by hand.
+ */
+export function manualEdit(settings: CocoonSettings, patch: Partial<CocoonSettings> = {}): CocoonSettings {
+  return withDerived({ ...settings, ...patch, profile: "custom" });
+}
+
+/**
+ * The one write path: derive the mirrored fields, persist, tell open tabs.
+ * Nothing else saves settings, so the ordering cannot drift between callers.
+ */
+export async function commitSettings(next: CocoonSettings): Promise<CocoonSettings> {
+  const settings = withDerived(next);
+  await saveSettings(settings);
+  await broadcastSettings(settings);
+  return settings;
 }

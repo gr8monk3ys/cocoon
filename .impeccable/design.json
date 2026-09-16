@@ -1,0 +1,467 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-03T07:08:42.485Z",
+  "title": "Design System: Cocoon",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Deep Slate Navy",
+        "purpose": "All primary text.",
+        "canonical": "oklch(28.3% 0.066 274.3)",
+        "darkValue": "#e7e9f8",
+        "tonalRamp": [
+          "#050626",
+          "#1b2044",
+          "#353d63",
+          "#525b83",
+          "#747ea8",
+          "#949fcc",
+          "#bac5f3",
+          "#e0ecff"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Slate Muted",
+        "purpose": "Eyebrows, hints, placeholders — everything explicitly demoted.",
+        "canonical": "oklch(49.9% 0.050 274.6)",
+        "darkValue": "#a3a9c9",
+        "tonalRamp": [
+          "#060820",
+          "#1d223c",
+          "#383e5a",
+          "#555c7a",
+          "#777e9f",
+          "#98a0c2",
+          "#bdc6e9",
+          "#e4edff"
+        ]
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Cool Paper",
+        "purpose": "The page ground.",
+        "canonical": "oklch(98.0% 0.007 277.2)",
+        "darkValue": "#171a2f",
+        "tonalRamp": [
+          "#0a0b0e",
+          "#232427",
+          "#3f3f43",
+          "#5c5d61",
+          "#7f8084",
+          "#a0a1a6",
+          "#c6c7cc",
+          "#edeef3"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface White",
+        "purpose": "Fields and raised surfaces.",
+        "canonical": "oklch(100.0% 0.000 89.9)",
+        "darkValue": "#20243d",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#808080",
+          "#a1a1a1",
+          "#c7c7c7",
+          "#eeeeee"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Cool Grey Edge",
+        "purpose": "The only hairline colour: inputs and unchecked checkboxes.",
+        "canonical": "oklch(89.7% 0.026 276.4)",
+        "darkValue": "#343a5c",
+        "tonalRamp": [
+          "#080a16",
+          "#202331",
+          "#3c3f4e",
+          "#595d6d",
+          "#7c7f90",
+          "#9da0b2",
+          "#c2c6d9",
+          "#e9edff"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Field White",
+        "purpose": "Form control ground.",
+        "canonical": "#ffffff",
+        "darkValue": "#1d2138"
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "Quiet Cobalt",
+        "purpose": "The single accent. Primary buttons, checked checkboxes, suggestion rail.",
+        "canonical": "oklch(47.5% 0.189 271.7)",
+        "darkValue": "#8d96ff",
+        "tonalRamp": [
+          "#110059",
+          "#15007d",
+          "#2527a1",
+          "#3c4cc6",
+          "#5b72ef",
+          "#7995ff",
+          "#9dbcff",
+          "#c2e4ff"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Cobalt Deep",
+        "purpose": "Primary button hover only.",
+        "canonical": "oklch(42.6% 0.167 272.1)",
+        "darkValue": "#a4abff",
+        "tonalRamp": [
+          "#0d0050",
+          "#140072",
+          "#272d96",
+          "#4050ba",
+          "#5f75e3",
+          "#7e97ff",
+          "#a2beff",
+          "#c8e6ff"
+        ]
+      },
+      "on-primary": {
+        "role": "primary",
+        "displayName": "On-Cobalt",
+        "purpose": "Label colour on a filled primary surface.",
+        "canonical": "#ffffff",
+        "darkValue": "#171a2f"
+      },
+      "primary-soft": {
+        "role": "primary",
+        "displayName": "Cobalt Wash",
+        "purpose": "Tinted ground for secondary buttons, nested panels, suggestions. Depth without shadow.",
+        "canonical": "oklch(96.0% 0.018 275.6)",
+        "darkValue": "#272c4d",
+        "tonalRamp": [
+          "#090b13",
+          "#21232d",
+          "#3d3f49",
+          "#5b5d68",
+          "#7d808b",
+          "#9ea1ad",
+          "#c4c7d3",
+          "#ebeefb"
+        ]
+      },
+      "primary-soft-border": {
+        "role": "primary",
+        "displayName": "Cobalt Edge",
+        "purpose": "Hairline on a secondary button.",
+        "canonical": "oklch(85.6% 0.055 278.3)",
+        "darkValue": "#3d4470",
+        "tonalRamp": [
+          "#070721",
+          "#1e213e",
+          "#393d5c",
+          "#565b7c",
+          "#787da1",
+          "#999fc4",
+          "#bfc5eb",
+          "#e5ecff"
+        ]
+      },
+      "focus": {
+        "role": "secondary",
+        "displayName": "Signal Iris",
+        "purpose": "The focus ring, and the top stop of the thread gradient.",
+        "canonical": "oklch(60.6% 0.206 275.0)",
+        "darkValue": "#8d96ff",
+        "tonalRamp": [
+          "#170060",
+          "#1d0084",
+          "#2d1ba9",
+          "#4445ce",
+          "#616cf8",
+          "#8090ff",
+          "#a3b7ff",
+          "#c8e0ff"
+        ]
+      },
+      "teal-ink": {
+        "role": "secondary",
+        "displayName": "Deep Verdigris",
+        "purpose": "Confirmation text only.",
+        "canonical": "oklch(49.5% 0.079 189.1)",
+        "darkValue": "#5fd6cd",
+        "tonalRamp": [
+          "#001312",
+          "#002f2c",
+          "#004c48",
+          "#0f6c67",
+          "#3e8f8a",
+          "#62b2ac",
+          "#88d8d2",
+          "#affff9"
+        ]
+      },
+      "error": {
+        "role": "tertiary",
+        "displayName": "Muted Oxblood",
+        "purpose": "Inline validation text and its 2px left border.",
+        "canonical": "oklch(49.0% 0.147 19.4)",
+        "darkValue": "#ff97a0",
+        "tonalRamp": [
+          "#330000",
+          "#570002",
+          "#7b021d",
+          "#a0303a",
+          "#c9565c",
+          "#ef787c",
+          "#ff9ea0",
+          "#ffc5c6"
+        ]
+      },
+      "error-soft": {
+        "role": "tertiary",
+        "displayName": "Oxblood Wash",
+        "purpose": "Inline validation ground.",
+        "canonical": "oklch(96.1% 0.016 8.2)",
+        "darkValue": "#3d2233",
+        "tonalRamp": [
+          "#11080a",
+          "#2b2122",
+          "#483c3e",
+          "#665a5c",
+          "#8a7c7e",
+          "#ab9d9f",
+          "#d2c3c5",
+          "#f9eaec"
+        ]
+      },
+      "thread-start": {
+        "role": "secondary",
+        "displayName": "Cobalt (thread top)",
+        "purpose": "Top stop of the one gradient in the system.",
+        "canonical": "oklch(60.6% 0.206 275.0)",
+        "darkValue": "#636efa",
+        "tonalRamp": [
+          "#170060",
+          "#1d0084",
+          "#2d1ba9",
+          "#4445ce",
+          "#616cf8",
+          "#8090ff",
+          "#a3b7ff",
+          "#c8e0ff"
+        ]
+      },
+      "thread-end": {
+        "role": "secondary",
+        "displayName": "Verdigris (thread foot)",
+        "purpose": "Bottom stop of the one gradient in the system.",
+        "canonical": "oklch(75.9% 0.121 188.8)",
+        "darkValue": "#33c9c0",
+        "tonalRamp": [
+          "#001615",
+          "#003330",
+          "#00524c",
+          "#00726b",
+          "#00968f",
+          "#11b9b1",
+          "#53e0d7",
+          "#80ffff"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The options page title only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The popup title only."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Sub-headings inside a section, and button labels."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All running text and control labels; field labels take weight 500."
+      },
+      "label": {
+        "displayName": "Eyebrow",
+        "purpose": "Section headings. Smaller and quieter than the body beneath them."
+      }
+    },
+    "shadows": [
+      {
+        "name": "banner-lift",
+        "value": "0 2px 8px rgba(32,38,74,0.08)",
+        "purpose": "The injected in-page feed notice. Just enough to detach from unknown host markup."
+      },
+      {
+        "name": "overlay-lift",
+        "value": "0 18px 50px rgba(23,26,47,0.35)",
+        "purpose": "The injected grounding dialog panel."
+      },
+      {
+        "name": "overlay-scrim",
+        "value": "rgba(23,26,47,0.55)",
+        "purpose": "Backdrop behind the grounding dialog."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one primary action on a surface. Instant state change; no transition anywhere in this system.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Apply suggestion</button>",
+      "css": ".ds-btn { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 13px; font-weight: 500; line-height: 1.5; padding: 9px 14px; border-radius: 9px; border: 1px solid transparent; cursor: pointer; } .ds-btn-primary { background: var(--cocoon-btn-bg, #3b4ac4); border-color: var(--cocoon-btn-bg, #3b4ac4); color: var(--cocoon-btn-ink, #ffffff); } .ds-btn-primary:hover { background: var(--cocoon-btn-bg-hover, #333fa8); border-color: var(--cocoon-btn-bg-hover, #333fa8); } .ds-btn-primary:focus-visible { outline: 2px solid var(--cocoon-focus, #636efa); outline-offset: 2px; border-radius: 4px; } .ds-btn-primary:disabled { opacity: 0.45; cursor: default; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Everything that is not the one primary action. Hover moves only the border; the fill holds still.",
+      "html": "<button class=\"ds-btn ds-btn-secondary\">Reset to global default</button>",
+      "css": ".ds-btn { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 13px; font-weight: 500; line-height: 1.5; padding: 9px 14px; border-radius: 9px; cursor: pointer; } .ds-btn-secondary { background: var(--cocoon-primary-soft, #eef1fe); color: var(--cocoon-ink, #20264a); border: 1px solid var(--cocoon-primary-soft-border, #c7cdf4); } .ds-btn-secondary:hover { border-color: var(--cocoon-primary, #3b4ac4); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--cocoon-focus, #636efa); outline-offset: 2px; border-radius: 4px; }"
+    },
+    {
+      "name": "Select",
+      "kind": "input",
+      "refersTo": "select",
+      "description": "Platform chevron stripped and redrawn as an inlined data URI, because a data URI cannot inherit currentColor and each scheme needs its own.",
+      "html": "<label class=\"ds-field\">Feed intensity<select class=\"ds-select\"><option>Limited</option><option>None</option></select></label>",
+      "css": ".ds-field { display: block; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 500; line-height: 1.5; color: var(--cocoon-ink, #20264a); } .ds-select { display: block; width: 100%; margin-top: 6px; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 400; color: var(--cocoon-ink, #20264a); background-color: var(--cocoon-field, #ffffff); border: 1px solid var(--cocoon-border, #d8dcef); border-radius: 9px; padding: 9px 32px 9px 11px; appearance: none; -webkit-appearance: none; cursor: pointer; background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%235a6180' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\"); background-repeat: no-repeat; background-position: right 12px center; } .ds-select:focus-visible { outline: 2px solid var(--cocoon-focus, #636efa); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "The only 1px border in the system, alongside the checkbox.",
+      "html": "<label class=\"ds-field\">Hostname<input class=\"ds-input\" type=\"text\" placeholder=\"e.g. reddit.com\" /></label>",
+      "css": ".ds-field { display: block; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 500; line-height: 1.5; color: var(--cocoon-ink, #20264a); } .ds-input { display: block; width: 100%; margin-top: 6px; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 400; color: var(--cocoon-ink, #20264a); background-color: var(--cocoon-field, #ffffff); border: 1px solid var(--cocoon-border, #d8dcef); border-radius: 9px; padding: 9px 11px; } .ds-input::placeholder { color: var(--cocoon-muted, #5a6180); opacity: 0.75; } .ds-input:focus-visible { outline: 2px solid var(--cocoon-focus, #636efa); outline-offset: 2px; }"
+    },
+    {
+      "name": "Checkbox Row",
+      "kind": "input",
+      "refersTo": "checkbox",
+      "description": "Fully redrawn. accent-color is banned here: it recolours the tick and leaves the platform's box.",
+      "html": "<label class=\"ds-check-row\"><input class=\"ds-check\" type=\"checkbox\" checked /> Enable feed cleaner on this site</label>",
+      "css": ".ds-check-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.5; color: var(--cocoon-ink, #20264a); cursor: pointer; } .ds-check { appearance: none; -webkit-appearance: none; flex: none; width: 18px; height: 18px; margin: 0; border: 1px solid var(--cocoon-border, #d8dcef); border-radius: 6px; background-color: var(--cocoon-field, #ffffff); cursor: pointer; } .ds-check:checked { background-color: var(--cocoon-primary, #3b4ac4); border-color: var(--cocoon-primary, #3b4ac4); background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='10' viewBox='0 0 12 10'%3E%3Cpath d='M1 5.2 4.3 8.5 11 1.5' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\"); background-repeat: no-repeat; background-position: center; } .ds-check:focus-visible { outline: 2px solid var(--cocoon-focus, #636efa); outline-offset: 2px; }"
+    },
+    {
+      "name": "Section Rail",
+      "kind": "custom",
+      "refersTo": "section-rail",
+      "description": "The signature component. One 2px thread down the left edge replaces a bordered card; it is why the options page no longer nests boxes three deep.",
+      "html": "<section class=\"ds-rail\"><h2>Current site override</h2><p class=\"ds-rail-body\">Per-site feed overrides are only available on supported social domains.</p></section>",
+      "css": ".ds-rail { position: relative; background: transparent; border: 0; border-radius: 0; padding: 2px 0 2px 16px; margin: 0 0 22px; } .ds-rail::before { content: \"\"; position: absolute; left: 0; top: 2px; bottom: 2px; width: 2px; border-radius: 2px; background: var(--cocoon-thread, linear-gradient(180deg, #636efa, #33c9c0)); opacity: 0.5; } .ds-rail h2 { margin: 0 0 12px; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 11.5px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--cocoon-muted, #5a6180); } .ds-rail-body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.5; color: var(--cocoon-ink, #20264a); }"
+    },
+    {
+      "name": "Inline Error",
+      "kind": "custom",
+      "refersTo": "notice-error",
+      "description": "Validation feedback. Marked with a 2px left border — the same vocabulary as the section rail, not a fifth kind of box.",
+      "html": "<p class=\"ds-error\" role=\"alert\">“news.ycombinator.com” isn’t a supported domain.</p>",
+      "css": ".ds-error { margin: 8px 0; padding: 8px 11px; border-radius: 9px; border-left: 2px solid var(--cocoon-error, #a3333d); font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 13px; line-height: 1.5; color: var(--cocoon-error, #a3333d); background: var(--cocoon-error-soft, #fdeef0); }"
+    },
+    {
+      "name": "In-Page Feed Banner",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Injected into a host site, not into Cocoon's own pages. Deliberately fixed-light and shadowed: it renders on markup Cocoon does not control, underneath Cocoon's own inversion filter.",
+      "html": "<div class=\"ds-banner\" role=\"status\"><span>Cocoon: feed filtered on this site (limited).</span><button class=\"ds-banner-dismiss\" type=\"button\" aria-label=\"Dismiss Cocoon feed notice\">Dismiss</button></div>",
+      "css": ".ds-banner { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: 12px; border-radius: 10px; font-family: system-ui, sans-serif; font-size: 14px; background: #eef1fe; color: #20264a; border: 1px solid #c7cdf4; box-shadow: 0 2px 8px rgba(32,38,74,0.08); max-width: 460px; } .ds-banner-dismiss { margin-left: auto; border: 0; background: #3b4ac4; color: #fff; padding: 5px 12px; border-radius: 999px; cursor: pointer; font-size: 13px; font-family: inherit; } .ds-banner-dismiss:focus-visible { outline: 2px solid #636efa; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Silk Thread",
+    "overview": "Cocoon is a control surface for people actively reducing sensory load, so the interface has to survive the standard it sets for other people's websites. It is built almost entirely from space. Structure is marked by a single 2px gradient thread — first as the mark under the masthead, then as the left rail of every section — and that thread is the only ornament in the system. It is also the only gradient. Because it is doing structural work rather than decorating, it earns its place; a second decorative flourish anywhere would not.\n\nThe system is mineral rather than soft: Deep Slate Navy text on a cool near-white ground, a Quiet Cobalt accent used sparingly, and a Cobalt-to-Verdigris thread. Hierarchy comes from treatment rather than size — section headings are small letterspaced eyebrows, quieter and smaller than the body text they introduce. That keeps overall contrast low, which is correct for this audience, while still making structure obvious at a glance.\n\nTwo absolutes shape everything else. There is no motion — not a transition, not an animation, nowhere — because reduce-motion is a product feature and the interface models what it sells. And there are no native controls: Chrome's own chevrons, checkboxes and borders are replaced outright, because a half-styled control is what makes an otherwise-considered UI look unfinished.",
+    "keyCharacteristics": [
+      "One 2px gradient thread carries all structural marking; no bordered cards",
+      "Zero shadows, zero transitions, zero animations in Cocoon's own pages",
+      "Headings smaller and quieter than body text; hierarchy from letterspacing",
+      "Every form control drawn by Cocoon, none by the platform",
+      "Full light and dark schemes; every token has both",
+      "Cool, mineral, low-contrast; the accent is rare enough to mean something"
+    ],
+    "rules": [
+      {
+        "name": "The One Gradient Rule",
+        "body": "The Cobalt→Verdigris thread is the only gradient in the system. It appears exactly twice per page: the masthead mark and the section rails. A second gradient anywhere is a defect.",
+        "section": "colors"
+      },
+      {
+        "name": "The Rare Accent Rule",
+        "body": "Quiet Cobalt is load-bearing precisely because it is scarce. It marks the one primary action and the one checked state. It never becomes a heading colour, a border default, or decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Verdigris-for-Done Rule",
+        "body": "Deep Verdigris appears only on confirmation. It never labels, never decorates, never becomes a second accent.",
+        "section": "colors"
+      },
+      {
+        "name": "The Eyebrow Rule",
+        "body": "A section heading is never larger than the text it introduces. Structure reads from letterspacing, case and colour — 11.5px, 600, 0.09em, uppercase, muted — never from size. Making a heading bigger to make it clearer is the wrong fix here.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Step Down Rule",
+        "body": "Controls sit one step below body text (13px against 14px). The interface never shouts a label at the user.",
+        "section": "typography"
+      },
+      {
+        "name": "The Fixed Popup Rule",
+        "body": "340px is the popup's only width. Do not add breakpoints, fluid widths or responsive behaviour to it.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat-Home Rule",
+        "body": "No shadow appears on the popup or the options page, in any state. If a surface needs separation there, it gets space, a tonal fill, or the rail.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Foreign Ground Rule",
+        "body": "Injected in-page surfaces carry a fixed light treatment that does not follow Cocoon's dark tokens. This is deliberate: they render on markup Cocoon does not control and underneath Cocoon's own colour-inversion filter, where predictable is worth more than consistent. Do not \"fix\" them by theming them.",
+        "section": "elevation"
+      },
+      {
+        "name": "The No Box Rule",
+        "body": "A section is marked by a 2px thread rail at 50% opacity and 16px of left padding — never by a border on four sides. Nested bordered cards are what the system was built to remove.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Rails Never Stack Rule",
+        "body": "A section inside a section is a sub-step, not a peer: it gets a flat Cobalt Wash panel at 10px radius and no rail. Nesting must never compound into rails inside rails.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do mark a section with the thread rail: 2px 0 2px 16px padding and a 2px ::before gradient at 0.5 opacity.",
+      "Do set section headings as eyebrows — 11.5px, 600, 0.09em, uppercase, Slate Muted — smaller than the body beneath them.",
+      "Do strip and redraw every native control with appearance: none plus an inlined data-URI glyph, defined once per colour scheme.",
+      "Do give every new colour token both a light and a dark value in the same commit. There are no single-scheme tokens.",
+      "Do use 9px as the default corner for anything a user clicks or types into.",
+      "Do express depth with a flat Cobalt Wash fill.",
+      "Do render every notice as real DOM with a role (role=\"status\", role=\"alert\"), so assistive tech can reach it."
+    ],
+    "donts": [
+      "Don't add a transition, an animation, or a scroll-behavior anywhere in Cocoon's UI. The current count is zero and that is the specification.",
+      "Don't put a shadow on the popup or the options page, in any state.",
+      "Don't nest a rail inside a rail. One level down is a flat tinted panel.",
+      "Don't wrap a section in a bordered card. That is the pattern this system was built to remove.",
+      "Don't style a checkbox with accent-color — it recolours the tick and leaves the platform's box, which is the exact half-finished look the No Native Controls rule exists to prevent.",
+      "Don't introduce a second gradient, or reuse the thread gradient as a fill.",
+      "Don't theme the injected in-page surfaces to follow dark mode.",
+      "Don't deliver a notice as CSS content text on a pseudo-element.",
+      "Don't add a webfont. A network request is forbidden by the product."
+    ]
+  }
+}

@@ -223,6 +223,16 @@ const MIME = {
 function capture(chrome, url, dest, w, h, timeoutMs = 45000) {
   return new Promise((resolve) => {
     const profile = join(tmpdir(), `cocoon-shot-${process.pid}-${Math.random().toString(36).slice(2)}`);
+    // Chrome is still writing its profile when SIGKILL lands, so a plain rm
+    // races it and throws ENOTEMPTY. Retry, and never let tearing down a temp
+    // directory fail a run whose screenshot already landed.
+    const dropProfile = () => {
+      try {
+        rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+      } catch {
+        // The OS can have the leftover; the artifact is what matters.
+      }
+    };
     const child = spawn(
       chrome,
       [
@@ -265,15 +275,16 @@ function capture(chrome, url, dest, w, h, timeoutMs = 45000) {
       const timedOut = Date.now() - started > timeoutMs;
       if (done || timedOut) {
         clearInterval(tick);
+        // Clean up only once Chrome has actually gone, not just been signalled.
+        child.once("exit", dropProfile);
         child.kill("SIGKILL");
-        rmSync(profile, { recursive: true, force: true });
         resolve(done);
       }
     }, 400);
 
     child.on("error", () => {
       clearInterval(tick);
-      rmSync(profile, { recursive: true, force: true });
+      dropProfile();
       resolve(false);
     });
   });

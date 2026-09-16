@@ -9,11 +9,12 @@
     "test": "vitest run",
     "lint": "eslint .",
     "preview": "vite preview",
-    "check": "npm run lint && npm test && npm run build && npm audit --omit=dev --audit-level=moderate",
+    "check": "npm run lint && npm test && npm run build && npm run e2e && npm audit --omit=dev --audit-level=moderate",
     "icons": "python3 scripts/generate-icons.py",
     "package:extension": "node scripts/package-extension.mjs",
     "release:verify": "node scripts/package-extension.mjs",
-    "screenshots": "npm run build && node scripts/generate-store-screenshots.mjs"
+    "screenshots": "npm run build && node scripts/generate-store-screenshots.mjs",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "react": "^19.2.7",
@@ -21,22 +22,23 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.1",
     "@testing-library/dom": "^10.4.1",
-    "@testing-library/user-event": "^14.6.4",
-    "@types/chrome": "^0.2.5",
-    "@types/node": "^26.1.2",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/chrome": "^0.2.7",
+    "@types/node": "^26.4.0",
     "@types/react": "^19.2.16",
-    "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.67.0",
-    "@typescript-eslint/parser": "^8.67.0",
-    "@vitejs/plugin-react": "^6.0.5",
-    "eslint": "^10.8.0",
+    "@types/react-dom": "^19.2.7",
+    "@typescript-eslint/eslint-plugin": "^8.70.0",
+    "@typescript-eslint/parser": "^8.69.0",
+    "@vitejs/plugin-react": "^6.1.0",
+    "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.4",
+    "eslint-plugin-react-refresh": "^0.5.6",
     "jest-axe": "^11.0.0",
     "jsdom": "^30.0.0",
     "typescript": "^6.0.3",
-    "vite": "^8.2.1",
-    "vitest": "^4.1.10"
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
   }
 }

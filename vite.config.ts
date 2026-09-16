@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve, dirname } from "node:path";
@@ -7,6 +8,10 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
+  test: {
+    // Playwright specs live in e2e/ and run via `npm run e2e`.
+    exclude: ["e2e/**", "node_modules/**", "dist/**"]
+  },
   build: {
     outDir: "dist",
     emptyOutDir: true,

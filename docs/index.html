@@ -9,64 +9,84 @@
     <link rel="stylesheet" href="assets/site.css" />
   </head>
   <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="./">
+          <img src="assets/icon-128.png" alt="" />
+          <span>Cocoon</span>
+        </a>
+        <nav class="site-nav" aria-label="Site">
+          <a href="./" aria-current="page">Home</a>
+          <a href="privacy/">Privacy Policy</a>
+          <a href="support/">Support</a>
+        </nav>
+      </div>
+    </header>
+
     <main>
-      <header>
-        <img src="assets/icon-128.png" alt="Cocoon logo" />
-        <div>
+      <div class="wrap">
+        <section class="hero">
+          <img src="assets/icon-128.png" alt="Cocoon logo" />
           <h1>Cocoon</h1>
-          <p class="subtitle">Calm, private browsing support for neurodivergent and mental health needs.</p>
-        </div>
-      </header>
-      <div class="brand-rule"></div>
+          <p class="subtitle measure">Calm, private browsing support for neurodivergent and mental health needs.</p>
+          <div class="brand-rule"></div>
+          <div class="hero-actions">
+            <a class="button" href="support/#install">Get Cocoon</a>
+            <a href="privacy/">How it handles your data</a>
+          </div>
+          <p class="meta measure">
+            Cocoon is not on the Chrome Web Store yet. Until it is, the support page walks through loading it unpacked
+            from source — the same build the listing will ship.
+          </p>
+        </section>
 
-      <nav>
-        <a class="pill" href="privacy/">Privacy Policy</a>
-        <a class="pill" href="support/">Support</a>
-      </nav>
+        <section class="card">
+          <h2>What Cocoon does</h2>
+          <div class="feature-grid">
+            <div class="feature">
+              <h3>Profile presets</h3>
+              <p>ADHD, Autism, Anxiety, and Custom starting points you fully control.</p>
+            </div>
+            <div class="feature">
+              <h3>Feed cleaner</h3>
+              <p>Hides algorithmic feed surfaces on supported social platforms, with per-site overrides.</p>
+            </div>
+            <div class="feature">
+              <h3>Sensory controls</h3>
+              <p>Lightweight dark mode and reduced motion, applied only where you ask.</p>
+            </div>
+            <div class="feature">
+              <h3>Grounding tool</h3>
+              <p>A motion-free breathing timer and 5-4-3-2-1 grounding flow, one click away.</p>
+            </div>
+            <div class="feature">
+              <h3>Scenario switches</h3>
+              <p>Focus, low-stimulation, calm-reset, and social-guardrail modes that expire on a timer you pick.</p>
+            </div>
+            <div class="feature">
+              <h3>Private by design</h3>
+              <p>No accounts, no analytics, no cloud. Settings live in your browser and nowhere else.</p>
+            </div>
+          </div>
+        </section>
 
-      <section class="card">
-        <h2>What Cocoon does</h2>
-        <div class="feature-grid">
-          <div class="feature">
-            <h3>Profile presets</h3>
-            <p>ADHD, Autism, Anxiety, and Custom starting points you fully control.</p>
-          </div>
-          <div class="feature">
-            <h3>Feed cleaner</h3>
-            <p>Hides algorithmic feed surfaces on supported social platforms, with per-site overrides.</p>
-          </div>
-          <div class="feature">
-            <h3>Sensory controls</h3>
-            <p>Lightweight dark mode and reduced motion, applied only where you ask.</p>
-          </div>
-          <div class="feature">
-            <h3>Grounding tool</h3>
-            <p>A motion-free breathing timer and 5-4-3-2-1 grounding flow, one click away.</p>
-          </div>
-          <div class="feature">
-            <h3>Scenario switches</h3>
-            <p>Focus, low-stimulation, calm-reset, and social-guardrail modes that expire on a timer you pick.</p>
-          </div>
-          <div class="feature">
-            <h3>Private by design</h3>
-            <p>No accounts, no analytics, no cloud. Settings live in your browser and nowhere else.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="card">
-        <h2>Supported sites</h2>
-        <p>x.com / twitter.com, facebook.com, instagram.com, youtube.com, reddit.com, and tiktok.com.</p>
-      </section>
-
-      <section class="card">
-        <h2>Links</h2>
-        <ul>
-          <li><a href="privacy/">Privacy Policy</a></li>
-          <li><a href="support/">Support</a></li>
-        </ul>
-        <p class="meta">This site accompanies the Chrome Web Store listing and user documentation.</p>
-      </section>
+        <section class="card">
+          <h2>Supported sites</h2>
+          <p class="measure">x.com / twitter.com, facebook.com, instagram.com, youtube.com, reddit.com, and tiktok.com.</p>
+        </section>
+      </div>
     </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <nav aria-label="Footer">
+          <a href="privacy/">Privacy Policy</a>
+          <a href="support/">Support</a>
+          <a href="https://github.com/gr8monk3ys/cocoon">Source on GitHub</a>
+        </nav>
+        <p>This site accompanies the Chrome Web Store listing and user documentation.</p>
+        <p>&copy; 2026 Cocoon. No accounts, no analytics, no cloud.</p>
+      </div>
+    </footer>
   </body>
 </html>

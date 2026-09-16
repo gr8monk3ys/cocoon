@@ -32,7 +32,7 @@
 
 html,
 body {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
@@ -45,25 +45,129 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   font-size: 16px;
   line-height: 1.55;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* One shared measure for every band, so the header rule, the hero, the
+   content and the footer all line up on the same left edge. */
+.wrap {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Running text stays near 65-75 characters even though the grid may be
+   wider; long lines are one of the loads this product exists to reduce. */
+.measure {
+  max-width: 68ch;
 }
 
 main {
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 40px 16px 64px;
+  flex: 1 0 auto;
+  padding: 0 0 72px;
 }
 
-header {
+/* Header ------------------------------------------------------------- */
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.site-header .wrap {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
+  justify-content: space-between;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
 
-header img {
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.brand img {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.site-nav a {
+  color: var(--muted);
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  color: var(--ink);
+}
+
+/* Hero ---------------------------------------------------------------- */
+
+.hero {
+  padding: 56px 0 40px;
+}
+
+.hero img {
   width: 56px;
   height: 56px;
   border-radius: 14px;
+  margin-bottom: 18px;
+}
+
+.hero .subtitle {
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-soft-border);
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.button:hover {
+  text-decoration: none;
+  border-color: var(--accent);
+}
+
+.hero .meta {
+  margin: 16px 0 0;
 }
 
 h1 {
@@ -92,12 +196,6 @@ h1 {
   margin: 14px 0 22px;
 }
 
-nav {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin: 12px 0 18px;
-}
 
 a {
   color: var(--accent);
@@ -106,6 +204,12 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 /*
@@ -167,17 +271,6 @@ ol {
   padding-left: 20px;
 }
 
-.pill {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-soft-border);
-  color: var(--ink);
-  font-size: 13px;
-}
 
 .feature-grid {
   display: grid;
@@ -204,4 +297,55 @@ ol {
   margin: 0;
   font-size: 14px;
   color: var(--muted);
+}
+
+/* Footer --------------------------------------------------------------- */
+
+.site-footer {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--border);
+  padding: 28px 0 40px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.site-footer nav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.site-footer p {
+  margin: 0 0 6px;
+  max-width: 68ch;
+}
+
+@media (max-width: 560px) {
+  .wrap {
+    padding: 0 18px;
+  }
+
+  .hero {
+    padding: 36px 0 28px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+
+  .hero .subtitle {
+    font-size: 17px;
+  }
+
+  .feature-grid {
+    gap: 16px 0;
+  }
+}
+
+/* Body copy inside sections keeps the same reading measure as the hero. */
+.card p,
+.card ul,
+.card ol {
+  max-width: 68ch;
 }

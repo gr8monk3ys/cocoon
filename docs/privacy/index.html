@@ -8,86 +8,107 @@
     <link rel="stylesheet" href="../assets/site.css" />
   </head>
   <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="../">
+          <img src="../assets/icon-128.png" alt="" />
+          <span>Cocoon</span>
+        </a>
+        <nav class="site-nav" aria-label="Site">
+          <a href="../">Home</a>
+          <a href="../privacy/" aria-current="page">Privacy Policy</a>
+          <a href="../support/">Support</a>
+        </nav>
+      </div>
+    </header>
+
     <main>
-      <header>
-        <img src="../assets/icon-128.png" alt="Cocoon logo" />
-        <div>
+      <div class="wrap">
+        <section class="hero">
           <h1>Privacy Policy</h1>
-          <p class="subtitle">Cocoon is designed to keep your settings local to your device.</p>
-        </div>
-      </header>
-      <div class="brand-rule"></div>
+          <p class="subtitle measure">Cocoon is designed to keep your settings local to your device.</p>
+          <div class="brand-rule"></div>
+        </section>
 
-      <nav>
-        <a class="pill" href="../">Home</a>
-        <a class="pill" href="../support/">Support</a>
-      </nav>
+        <section class="card">
+          <p class="meta">Last updated: 2026-02-14</p>
+          <h2>Summary</h2>
+          <ul>
+            <li>We do not run third-party advertising trackers.</li>
+            <li>We do not transmit your browsing content to cloud services.</li>
+            <li>We store extension settings locally using <code>chrome.storage.local</code>.</li>
+          </ul>
+        </section>
 
-      <section class="card">
-        <p class="meta">Last updated: 2026-02-14</p>
-        <h2>Summary</h2>
-        <ul>
-          <li>We do not run third-party advertising trackers.</li>
-          <li>We do not transmit your browsing content to cloud services.</li>
-          <li>We store extension settings locally using <code>chrome.storage.local</code>.</li>
-        </ul>
-      </section>
+        <section class="card">
+          <h2>Data We Store</h2>
+          <p>Cocoon stores only user-configured settings such as:</p>
+          <ul>
+            <li>profile preset selection</li>
+            <li>sensory and feed-cleaner toggle state</li>
+            <li>grounding tool toggle state</li>
+            <li>per-site feed-cleaner overrides</li>
+            <li>adaptive suggestion rules (if enabled)</li>
+          </ul>
+          <p>This data remains local to your browser profile.</p>
+        </section>
 
-      <section class="card">
-        <h2>Data We Store</h2>
-        <p>Cocoon stores only user-configured settings such as:</p>
-        <ul>
-          <li>profile preset selection</li>
-          <li>sensory and feed-cleaner toggle state</li>
-          <li>grounding tool toggle state</li>
-          <li>per-site feed-cleaner overrides</li>
-          <li>adaptive suggestion rules (if enabled)</li>
-        </ul>
-        <p>This data remains local to your browser profile.</p>
-      </section>
+        <section class="card">
+          <h2>Data We Do Not Collect</h2>
+          <ul>
+            <li>No account registration data</li>
+            <li>No remote analytics events</li>
+            <li>No cloud storage of browsing content</li>
+            <li>No sale of personal information</li>
+          </ul>
+        </section>
 
-      <section class="card">
-        <h2>Data We Do Not Collect</h2>
-        <ul>
-          <li>No account registration data</li>
-          <li>No remote analytics events</li>
-          <li>No cloud storage of browsing content</li>
-          <li>No sale of personal information</li>
-        </ul>
-      </section>
+        <section class="card">
+          <h2>Permissions Usage</h2>
+          <p>Cocoon requests:</p>
+          <ul>
+            <li><code>storage</code>: to save your extension settings</li>
+            <li><code>activeTab</code>: to read the active tab hostname when you open the popup (for current-site controls)</li>
+            <li>
+              <code>alarms</code>: to auto-expire timed scenario quick-switches and restore baseline settings (no browsing
+              content is sent anywhere)
+            </li>
+            <li>
+              host permissions for supported social domains only, so content scripts can apply selected controls on those
+              sites
+            </li>
+          </ul>
+        </section>
 
-      <section class="card">
-        <h2>Permissions Usage</h2>
-        <p>Cocoon requests:</p>
-        <ul>
-          <li><code>storage</code>: to save your extension settings</li>
-          <li><code>activeTab</code>: to read the active tab hostname when you open the popup (for current-site controls)</li>
-          <li>
-            <code>alarms</code>: to auto-expire timed scenario quick-switches and restore baseline settings (no browsing
-            content is sent anywhere)
-          </li>
-          <li>
-            host permissions for supported social domains only, so content scripts can apply selected controls on those
-            sites
-          </li>
-        </ul>
-      </section>
+        <section class="card">
+          <h2>Security and Retention</h2>
+          <ul>
+            <li>Settings persist until you remove the extension or clear extension storage.</li>
+            <li>You can reset settings from the options page.</li>
+          </ul>
+        </section>
 
-      <section class="card">
-        <h2>Security and Retention</h2>
-        <ul>
-          <li>Settings persist until you remove the extension or clear extension storage.</li>
-          <li>You can reset settings from the options page.</li>
-        </ul>
-      </section>
-
-      <section class="card">
-        <h2>Contact</h2>
-        <p>
-          For privacy questions or deletion requests related to local settings behavior, see the
-          <a href="../support/">support page</a> and include your extension version.
-        </p>
-      </section>
+        <section class="card">
+          <h2>Contact</h2>
+          <p>
+            For privacy questions or deletion requests related to local settings behavior, see the
+            <a href="../support/">support page</a> and include your extension version.
+          </p>
+        </section>
+      </div>
     </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <nav aria-label="Footer">
+          <a href="../">Home</a>
+          <a href="../privacy/">Privacy Policy</a>
+          <a href="../support/">Support</a>
+          <a href="https://github.com/gr8monk3ys/cocoon">Source on GitHub</a>
+        </nav>
+        <p>This site accompanies the Chrome Web Store listing and user documentation.</p>
+        <p>&copy; 2026 Cocoon. No accounts, no analytics, no cloud.</p>
+      </div>
+    </footer>
   </body>
 </html>
