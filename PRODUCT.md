@@ -110,7 +110,7 @@ Technical constraints:
 - The popup may read only the active tab's hostname (`activeTab`), never its
   content.
 
-Terminology is defined in `CONTEXT.md`: intensity, override, profile, scenario,
+Terminology is defined in `GLOSSARY.md`: intensity, override, profile, scenario,
 rule, host rules, page kind, marker, rot, page plan, commit.
 
 ## Brand Commitments
