@@ -96,7 +96,7 @@ store submission kit.
 - `src/popup/`, `src/options/` — React UIs
 - `e2e/` — fixtures and Playwright specs
 
-`CONTEXT.md` defines the domain terms used throughout (intensity, override,
+`GLOSSARY.md` defines the domain terms used throughout (intensity, override,
 page kind, marker, rot, page plan, commit).
 
 ## License
