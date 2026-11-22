@@ -5,6 +5,7 @@ import { screen } from "@testing-library/dom";
 import { axe } from "jest-axe";
 import { createChromeMock } from "../test/chromeMock";
 import type { CocoonSettings } from "../lib/types";
+import { fromAny } from "@total-typescript/shoehorn";
 
 // Stored settings deliberately predate `feedIntensity`, `adaptive` and
 // `activeScenario`, so every render also exercises the settings migration.
@@ -20,7 +21,7 @@ const LEGACY_STORED_SETTINGS = {
 let env: ReturnType<typeof createChromeMock>;
 
 function stored(): CocoonSettings {
-  return env.store.settings as CocoonSettings;
+  return fromAny<CocoonSettings, unknown>(env.store.settings);
 }
 
 async function clickNthButton(name: string, index: number): Promise<void> {
@@ -45,7 +46,7 @@ describe("options ui flows", () => {
 
     expect(await screen.findByText("Cocoon Settings")).toBeTruthy();
 
-    const hostnameInput = (await screen.findByLabelText("Hostname")) as HTMLInputElement;
+    const hostnameInput = fromAny<HTMLInputElement, unknown>(await screen.findByLabelText("Hostname"));
     await userEvent.type(hostnameInput, "reddit.com");
     await clickNthButton("Save", 1);
 
@@ -59,7 +60,7 @@ describe("options ui flows", () => {
     await import("./main");
     await screen.findByText("Cocoon Settings");
 
-    const hostnameInput = (await screen.findByLabelText("Hostname")) as HTMLInputElement;
+    const hostnameInput = fromAny<HTMLInputElement, unknown>(await screen.findByLabelText("Hostname"));
     await userEvent.type(hostnameInput, "news.ycombinator.com");
     await clickNthButton("Save", 1);
 
@@ -78,8 +79,8 @@ describe("options ui flows", () => {
     await import("./main");
     await screen.findByText("Cocoon Settings");
 
-    const startInput = (await screen.findByLabelText("Schedule start hour")) as HTMLInputElement;
-    const endInput = (await screen.findByLabelText("Schedule end hour")) as HTMLInputElement;
+    const startInput = fromAny<HTMLInputElement, unknown>(await screen.findByLabelText("Schedule start hour"));
+    const endInput = fromAny<HTMLInputElement, unknown>(await screen.findByLabelText("Schedule end hour"));
     await userEvent.clear(startInput);
     await userEvent.type(startInput, "9");
     await userEvent.clear(endInput);

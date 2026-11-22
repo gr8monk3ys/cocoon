@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createChromeMock } from "./test/chromeMock";
 import { DEFAULT_SETTINGS, type CocoonSettings } from "./lib/types";
+import { fromAny } from "@total-typescript/shoehorn";
 
 function expiredScenarioSettings(): CocoonSettings {
   return {
@@ -28,7 +29,7 @@ function makeEnv() {
 }
 
 function storedSettings(store: Record<string, unknown>): CocoonSettings {
-  return store.settings as CocoonSettings;
+  return fromAny<CocoonSettings, unknown>(store.settings);
 }
 
 describe("background scenario expiry", () => {
