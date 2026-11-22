@@ -23,6 +23,14 @@ function stored(): CocoonSettings {
   return env.store.settings as CocoonSettings;
 }
 
+async function clickNthButton(name: string, index: number): Promise<void> {
+  const button = (await screen.findAllByRole("button", { name }))[index];
+  if (!button) {
+    throw new Error(`No "${name}" button at index ${index}`);
+  }
+  await userEvent.click(button);
+}
+
 describe("options ui flows", () => {
   beforeEach(() => {
     vi.resetModules();
@@ -39,12 +47,11 @@ describe("options ui flows", () => {
 
     const hostnameInput = (await screen.findByLabelText("Hostname")) as HTMLInputElement;
     await userEvent.type(hostnameInput, "reddit.com");
-    const sections = await screen.findAllByRole("button", { name: "Save" });
-    await userEvent.click(sections[1]);
+    await clickNthButton("Save", 1);
 
     expect(await screen.findByText("reddit.com")).toBeTruthy();
 
-    await userEvent.click((await screen.findAllByRole("button", { name: "Remove" }))[0]);
+    await clickNthButton("Remove", 0);
     expect(await screen.findByText("No per-site overrides yet.")).toBeTruthy();
   });
 
@@ -54,8 +61,7 @@ describe("options ui flows", () => {
 
     const hostnameInput = (await screen.findByLabelText("Hostname")) as HTMLInputElement;
     await userEvent.type(hostnameInput, "news.ycombinator.com");
-    const saveButtons = await screen.findAllByRole("button", { name: "Save" });
-    await userEvent.click(saveButtons[1]);
+    await clickNthButton("Save", 1);
 
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("isn't a supported domain");
@@ -63,7 +69,7 @@ describe("options ui flows", () => {
     // A valid hostname clears the error and saves.
     await userEvent.clear(hostnameInput);
     await userEvent.type(hostnameInput, "reddit.com");
-    await userEvent.click(saveButtons[1]);
+    await clickNthButton("Save", 1);
     expect(screen.queryByRole("alert")).toBeNull();
     expect(await screen.findByText("reddit.com")).toBeTruthy();
   });
@@ -179,13 +185,13 @@ describe("options controls persist through the one write path", () => {
     await screen.findByText("Cocoon Settings");
 
     await userEvent.type(await screen.findByLabelText("Domain rule hostname"), "reddit.com");
-    await userEvent.click((await screen.findAllByRole("button", { name: "Save" }))[0]);
+    await clickNthButton("Save", 0);
     await vi.waitFor(() => expect(stored().adaptive.domainRules).toEqual({ "reddit.com": "adhd" }));
 
     await userEvent.selectOptions(await screen.findByLabelText("Profile"), "anxiety");
     await vi.waitFor(() => expect(stored().profile).toBe("anxiety"));
 
-    await userEvent.click((await screen.findAllByRole("button", { name: "Remove" }))[0]);
+    await clickNthButton("Remove", 0);
 
     await vi.waitFor(() => expect(stored().adaptive.domainRules).toEqual({}));
     expect(stored().profile).toBe("custom");

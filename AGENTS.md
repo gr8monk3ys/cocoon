@@ -16,15 +16,18 @@ Run the full local gate before considering any change done — it's the same
 one CI enforces as the required status check:
 
 ```bash
-npm run check   # lint + test + typecheck/build + production-dep audit
+npm run check   # lint + typecheck + depcruise + test + build + e2e + production-dep audit
 ```
 
 `npm run check` runs, in order:
 
 1. `npm run lint` — `eslint .`
-2. `npm test` — `vitest run`
-3. `npm run build` — `tsc --noEmit && vite build && vite build --config vite.content.config.ts`
-4. `npm audit --omit=dev --audit-level=moderate` — blocking for production
+2. `npm run typecheck` — `tsc --noEmit` (strict, `noUncheckedIndexedAccess`)
+3. `npm run depcruise` — dependency-cruiser: no cycles, shared `lib/`/`rules/` never import UI surfaces
+4. `npm test` — `vitest run`
+5. `npm run build` — `tsc --noEmit && vite build && vite build --config vite.content.config.ts`
+6. `npm run e2e` — Playwright
+7. `npm audit --omit=dev --audit-level=moderate` — blocking for production
    dependencies only (a separate full-tree audit in CI is informational)
 
 Each step can also be run individually while iterating:
@@ -35,7 +38,7 @@ npm test
 npm run build
 ```
 
-All four must pass (audit: zero moderate+ vulnerabilities in production
+Every step must pass (audit: zero moderate+ vulnerabilities in production
 dependencies) before a change is considered complete.
 
 ## Notes for agents
