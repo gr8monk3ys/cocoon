@@ -8,13 +8,16 @@
     "build": "tsc --noEmit && vite build && vite build --config vite.content.config.ts",
     "test": "vitest run",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "depcruise": "depcruise src",
     "preview": "vite preview",
-    "check": "npm run lint && npm test && npm run build && npm run e2e && npm audit --omit=dev --audit-level=moderate",
+    "check": "npm run lint && npm run typecheck && npm run depcruise && npm test && npm run build && npm run e2e && npm audit --omit=dev --audit-level=moderate",
     "icons": "python3 scripts/generate-icons.py",
     "package:extension": "node scripts/package-extension.mjs",
     "release:verify": "node scripts/package-extension.mjs",
     "screenshots": "npm run build && node scripts/generate-store-screenshots.mjs",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "prepare": "simple-git-hooks"
   },
   "dependencies": {
     "react": "^19.2.7",
@@ -25,6 +28,8 @@
     "@playwright/test": "^1.62.1",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/user-event": "^14.6.7",
+    "@total-typescript/shoehorn": "^0.1.2",
+    "@total-typescript/ts-reset": "^0.6.1",
     "@types/chrome": "^0.2.7",
     "@types/node": "^26.4.0",
     "@types/react": "^19.2.16",
@@ -32,13 +37,22 @@
     "@typescript-eslint/eslint-plugin": "^8.72.1",
     "@typescript-eslint/parser": "^8.71.1",
     "@vitejs/plugin-react": "^6.1.0",
+    "dependency-cruiser": "^18.8.0",
     "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",
     "jest-axe": "^11.0.0",
     "jsdom": "^30.0.0",
+    "lint-staged": "^17.6.2",
+    "simple-git-hooks": "^2.14.0",
     "typescript": "^6.0.3",
     "vite": "^8.3.3",
     "vitest": "^4.1.12"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged && npm run typecheck && npm run depcruise"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs}": "eslint"
   }
 }

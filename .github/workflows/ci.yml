@@ -32,6 +32,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Dependency boundaries
+        run: npm run depcruise
+
       - name: Test
         run: npm test
 

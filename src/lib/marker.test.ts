@@ -32,7 +32,7 @@ describe("markUnits", () => {
     expect(mark("test.suggested")).toBe(1);
     const units = document.querySelectorAll('[data-cocoon-unit~="test.suggested"]');
     expect(units).toHaveLength(1);
-    expect(units[0].textContent).toContain("Suggested for you");
+    expect(units[0]?.textContent).toContain("Suggested for you");
   });
 
   it("is idempotent and stacks ids from several rules on one element", () => {
@@ -67,7 +67,7 @@ describe("markUnits", () => {
     expect(mark(rule!.id, rule!.mark!)).toBe(1);
     const marked = document.querySelectorAll('[data-cocoon-unit~="facebook.feedPosts"]');
     expect(marked).toHaveLength(1);
-    expect(marked[0].querySelector("h3")?.textContent).toBe("Feed posts");
+    expect(marked[0]?.querySelector("h3")?.textContent).toBe("Feed posts");
   });
 });
 

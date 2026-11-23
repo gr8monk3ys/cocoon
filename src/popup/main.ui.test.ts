@@ -5,6 +5,7 @@ import { screen } from "@testing-library/dom";
 import { axe } from "jest-axe";
 import { createChromeMock } from "../test/chromeMock";
 import type { CocoonSettings } from "../lib/types";
+import { fromAny } from "@total-typescript/shoehorn";
 
 // Stored settings deliberately predate `feedIntensity`, `adaptive` and
 // `activeScenario`, so every render also exercises the settings migration.
@@ -20,7 +21,7 @@ const LEGACY_STORED_SETTINGS = {
 let env: ReturnType<typeof createChromeMock>;
 
 function stored(): CocoonSettings {
-  return env.store.settings as CocoonSettings;
+  return fromAny<CocoonSettings, unknown>(env.store.settings);
 }
 
 /** Boots the popup against `settings`, with the active tab on reddit.com. */
@@ -46,9 +47,9 @@ describe("popup ui flows", () => {
     expect(await screen.findByText("Cocoon")).toBeTruthy();
     expect(await screen.findByText("Site: reddit.com")).toBeTruthy();
 
-    const checkbox = (await screen.findByRole("checkbox", {
-      name: "Enable feed cleaner on this site"
-    })) as HTMLInputElement;
+    const checkbox = fromAny<HTMLInputElement, unknown>(
+      await screen.findByRole("checkbox", { name: "Enable feed cleaner on this site" })
+    );
 
     await userEvent.click(checkbox);
     expect(checkbox.checked).toBe(false);
@@ -111,7 +112,7 @@ describe("popup controls persist through the one write path", () => {
   it("the grounding button is disabled when the tool is switched off", async () => {
     await bootWith({ ...LEGACY_STORED_SETTINGS, enableGroundingTool: false });
 
-    const button = (await screen.findByRole("button", { name: "Open grounding tool" })) as HTMLButtonElement;
+    const button = fromAny<HTMLButtonElement, unknown>(await screen.findByRole("button", { name: "Open grounding tool" }));
     expect(button.disabled).toBe(true);
   });
 

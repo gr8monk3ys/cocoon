@@ -3,6 +3,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createChromeMock } from "./test/chromeMock";
 import { DEFAULT_SETTINGS } from "./lib/types";
+import { fromAny } from "@total-typescript/shoehorn";
 
 function mockChrome(initialStore: Record<string, unknown> = {}) {
   return createChromeMock({ store: { settings: DEFAULT_SETTINGS, ...initialStore } });
@@ -17,7 +18,7 @@ describe("content grounding accessibility", () => {
     vi.resetModules();
     vi.restoreAllMocks();
     document.body.innerHTML = '<button id="origin">Focus origin</button>';
-    (document.getElementById("origin") as HTMLButtonElement).focus();
+    fromAny<HTMLButtonElement, unknown>(document.getElementById("origin")).focus();
   });
 
   afterEach(() => {
@@ -33,7 +34,7 @@ describe("content grounding accessibility", () => {
     env.send({ type: "COCOON_APPLY_SETTINGS", payload: { ...NO_FEED_SETTINGS, enableGroundingTool: true } });
     env.send({ type: "COCOON_OPEN_GROUNDING" });
 
-    const overlay = document.getElementById("cocoon-grounding") as HTMLDivElement;
+    const overlay = fromAny<HTMLDivElement, unknown>(document.getElementById("cocoon-grounding"));
     expect(overlay).toBeTruthy();
     expect(overlay.getAttribute("role")).toBe("dialog");
     expect(overlay.getAttribute("aria-modal")).toBe("true");
@@ -56,7 +57,7 @@ describe("content grounding accessibility", () => {
     env.send({ type: "COCOON_OPEN_GROUNDING" });
 
     // Simulate focus escaping to the page behind the modal, then press Tab.
-    (document.getElementById("origin") as HTMLButtonElement).focus();
+    fromAny<HTMLButtonElement, unknown>(document.getElementById("origin")).focus();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
 
     // Focus is pulled back into the dialog instead of staying on the page.
@@ -161,7 +162,7 @@ describe("content feed banner persistence", () => {
     await vi.advanceTimersByTimeAsync(10);
 
     expect(bannerText()).toContain("feed filtered on this site");
-    const state = env.store.bannerState as Record<string, { filteredShownAt?: number }>;
+    const state = fromAny<Record<string, { filteredShownAt?: number }>, unknown>(env.store.bannerState);
     expect(state["www.reddit.com"]?.filteredShownAt).toBeTypeOf("number");
 
     // Let all delayed re-checks run inside this test so nothing leaks.
@@ -191,7 +192,7 @@ describe("content feed banner persistence", () => {
     await vi.advanceTimersByTimeAsync(10);
 
     expect(document.getElementById("cocoon-feed-banner")).toBeNull();
-    const state = env.store.bannerState as Record<string, { rotDismissedAt?: number }>;
+    const state = fromAny<Record<string, { rotDismissedAt?: number }>, unknown>(env.store.bannerState);
     expect(state["www.reddit.com"]?.rotDismissedAt).toBeTypeOf("number");
 
     await vi.advanceTimersByTimeAsync(5000);

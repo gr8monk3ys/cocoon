@@ -7,7 +7,11 @@ let overlay: HTMLDivElement | null = null;
 let breathTimer: number | null = null;
 let previousFocusedElement: HTMLElement | null = null;
 
-const BREATH_PHASES = [
+interface BreathPhase {
+  label: string;
+  seconds: number;
+}
+const BREATH_PHASES: readonly [BreathPhase, ...BreathPhase[]] = [
   { label: "Breathe in", seconds: 4 },
   { label: "Hold", seconds: 4 },
   { label: "Breathe out", seconds: 4 }
@@ -31,9 +35,14 @@ function startBreathingGuide(panel: HTMLElement): void {
 
   let round = 1;
   let phase = 0;
-  let remaining = BREATH_PHASES[0].seconds;
+  const [firstPhase] = BREATH_PHASES;
+  let remaining = firstPhase.seconds;
   const render = (): void => {
-    cue.textContent = `Round ${round} of ${BREATH_ROUNDS} — ${BREATH_PHASES[phase].label} (${remaining})`;
+    const current = BREATH_PHASES[phase];
+    if (!current) {
+      return;
+    }
+    cue.textContent = `Round ${round} of ${BREATH_ROUNDS} — ${current.label} (${remaining})`;
   };
   render();
 
@@ -54,7 +63,7 @@ function startBreathingGuide(panel: HTMLElement): void {
       stopBreathingGuide();
       return;
     }
-    remaining = BREATH_PHASES[phase].seconds;
+    remaining = BREATH_PHASES[phase]?.seconds ?? firstPhase.seconds;
     render();
   }, 1000);
 }
@@ -88,13 +97,13 @@ function handleOverlayKeydown(event: KeyboardEvent): void {
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     )
   );
-  if (focusable.length === 0) {
+  const first = focusable[0];
+  const last = focusable.at(-1);
+  if (!first || !last) {
     event.preventDefault();
     return;
   }
 
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
   const active = document.activeElement;
   const outside = !(active instanceof HTMLElement) || !overlay.contains(active);
 
