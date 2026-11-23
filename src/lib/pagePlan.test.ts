@@ -57,7 +57,10 @@ describe("planPage: which rules are active", () => {
     expect(selectorsOf(plan("www.youtube.com", "limited"))).toEqual(["ytd-rich-grid-renderer"]);
     expect(selectorsOf(plan("www.youtube.com", "none"))).toEqual([
       "ytd-rich-grid-renderer",
-      "ytd-browse[page-subtype='home'] #contents"
+      "ytd-browse[page-subtype='home'] #contents",
+      "ytd-rich-shelf-renderer[is-shorts]",
+      "ytd-reel-shelf-renderer",
+      "ytd-shorts"
     ]);
     expect(selectorsOf(plan("www.reddit.com", "none"))).toEqual(["shreddit-feed"]);
     expect(selectorsOf(plan("www.tiktok.com", "limited"))).toEqual(["[data-e2e='recommend-list']"]);
@@ -66,6 +69,30 @@ describe("planPage: which rules are active", () => {
       "div[data-e2e='video-feed-item']"
     ]);
     expect(selectorsOf(plan("twitter.com", "none"))).toEqual(selectorsOf(plan("x.com", "none")));
+  });
+});
+
+describe("planPage: YouTube Shorts", () => {
+  const shortsIds = ["youtube.shortsShelf", "youtube.shortsReelShelf", "youtube.shorts"];
+
+  it("hides Shorts only at the strongest intensity", () => {
+    const ids = (p: PagePlan) => p.activeRules.map((rule) => rule.id);
+    expect(ids(plan("www.youtube.com", "limited")).filter((id) => shortsIds.includes(id))).toEqual([]);
+    expect(ids(plan("www.youtube.com", "none"))).toEqual(expect.arrayContaining(shortsIds));
+  });
+
+  it("gates the Shorts player on the reels page kind, so a cached player never hides elsewhere", () => {
+    const { feedCss } = plan("www.youtube.com", "none");
+    expect(feedCss).toContain(`html[${PATH_ATTR}="reels"] ytd-shorts { display: none !important; }`);
+    expect(feedCss).not.toMatch(/^ytd-shorts /m);
+  });
+
+  it("checks the Shorts player for rot on a Shorts page, and never the shelves", () => {
+    const checkable = plan("www.youtube.com", "none", "/shorts/abc123").checkableRules.map((rule) => rule.id);
+    expect(checkable).toContain("youtube.shorts");
+    expect(checkable).not.toContain("youtube.shortsShelf");
+    expect(checkable).not.toContain("youtube.shortsReelShelf");
+    expect(plan("www.youtube.com", "none", "/").checkableRules.map((rule) => rule.id)).not.toContain("youtube.shorts");
   });
 });
 
@@ -145,6 +172,15 @@ describe("planPage: page kind", () => {
     ["/marketplace/", "other"]
   ] as const)("facebook %s -> %s", (pathname, kind) => {
     expect(plan("www.facebook.com", "limited", pathname).path).toBe(kind);
+  });
+
+  it.each([
+    ["/", "home"],
+    ["/shorts/abc123", "reels"],
+    ["/watch?v=abc123", "other"],
+    ["/@somechannel/videos", "other"]
+  ] as const)("youtube %s -> %s", (pathname, kind) => {
+    expect(plan("www.youtube.com", "limited", pathname).path).toBe(kind);
   });
 
   it("treats every non-root path as other on hosts without page prefixes", () => {
