@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { openGroundingOverlay } from "./grounding";
+import { fromAny } from "@total-typescript/shoehorn";
 
 // One full guide: 4 rounds x (in 4s + hold 4s + out 4s).
 const FULL_GUIDE_SECONDS = 4 * 3 * 4;
@@ -10,7 +11,7 @@ function cue(): string {
 }
 
 function closeButton(): HTMLButtonElement {
-  return document.getElementById("cocoon-close") as HTMLButtonElement;
+  return fromAny<HTMLButtonElement, unknown>(document.getElementById("cocoon-close"));
 }
 
 function advanceSeconds(seconds: number): void {
@@ -66,7 +67,7 @@ describe("grounding breathing guide", () => {
   it("stops the timer when closed mid-guide and restarts from round 1 on reopen", () => {
     openGroundingOverlay();
     advanceSeconds(13);
-    const firstCue = document.getElementById("cocoon-breath-cue") as HTMLElement;
+    const firstCue = fromAny<HTMLElement, unknown>(document.getElementById("cocoon-breath-cue"));
     expect(firstCue.textContent).toBe("Round 2 of 4 — Breathe in (3)");
 
     closeButton().click();
@@ -97,9 +98,9 @@ describe("grounding breathing guide", () => {
 
   it("closes on a backdrop click but not on a click inside the panel", () => {
     openGroundingOverlay();
-    const overlay = document.getElementById("cocoon-grounding") as HTMLDivElement;
+    const overlay = fromAny<HTMLDivElement, unknown>(document.getElementById("cocoon-grounding"));
 
-    (document.getElementById("cocoon-grounding-title") as HTMLElement).click();
+    fromAny<HTMLElement, unknown>(document.getElementById("cocoon-grounding-title")).click();
     expect(document.getElementById("cocoon-grounding")).not.toBeNull();
 
     const clearInterval = vi.spyOn(window, "clearInterval");

@@ -14,6 +14,7 @@ import {
   upsertDomainRule,
   upsertScheduleRule
 } from "./settings";
+import { fromAny } from "@total-typescript/shoehorn";
 
 describe("applyProfile", () => {
   it("loads autism preset", () => {
@@ -224,7 +225,7 @@ describe("per-site override never cleans less than the global setting", () => {
 describe("clearExpiredScenario", () => {
   it("restores the pre-scenario settings once the scenario expires", () => {
     const active = applyScenario(applyProfile("anxiety"), "focus_session", 30);
-    const expiresAt = active.activeScenario?.expiresAt as number;
+    const expiresAt = fromAny<number, unknown>(active.activeScenario?.expiresAt);
 
     const restored = clearExpiredScenario(active, expiresAt + 1);
 
@@ -235,14 +236,14 @@ describe("clearExpiredScenario", () => {
 
   it("clears exactly at the expiry boundary (now === expiresAt)", () => {
     const active = applyScenario(applyProfile("adhd"), "focus_session", 30);
-    const expiresAt = active.activeScenario?.expiresAt as number;
+    const expiresAt = fromAny<number, unknown>(active.activeScenario?.expiresAt);
 
     expect(clearExpiredScenario(active, expiresAt).activeScenario).toBeNull();
   });
 
   it("leaves an unexpired scenario untouched", () => {
     const active = applyScenario(applyProfile("adhd"), "focus_session", 30);
-    const expiresAt = active.activeScenario?.expiresAt as number;
+    const expiresAt = fromAny<number, unknown>(active.activeScenario?.expiresAt);
 
     const result = clearExpiredScenario(active, expiresAt - 1);
     expect(result.activeScenario?.type).toBe("focus_session");
@@ -257,7 +258,7 @@ describe("clearExpiredScenario", () => {
     expect(second.activeScenario?.previous?.profile).toBe("adhd");
     expect(second.activeScenario?.previous?.feedIntensity).toBe("limited");
 
-    const expiresAt = second.activeScenario?.expiresAt as number;
+    const expiresAt = fromAny<number, unknown>(second.activeScenario?.expiresAt);
     const restored = clearExpiredScenario(second, expiresAt + 1);
     expect(restored.profile).toBe("adhd");
     expect(restored.feedIntensity).toBe("limited");

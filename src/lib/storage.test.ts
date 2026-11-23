@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createChromeMock } from "../test/chromeMock";
 import { getSettings, saveSettings } from "./settings";
 import { DEFAULT_SETTINGS } from "./types";
+import { fromAny } from "@total-typescript/shoehorn";
 
 function withStored(settings?: Record<string, unknown>): void {
   vi.stubGlobal("chrome", createChromeMock({ store: settings ? { settings } : {} }).chrome);
@@ -81,7 +82,7 @@ describe("commitSettings", () => {
     const committed = await commitSettings({ ...DEFAULT_SETTINGS, feedIntensity: "none", hideAlgorithmicFeeds: false });
 
     expect(committed.hideAlgorithmicFeeds).toBe(true);
-    expect((env.store.settings as typeof DEFAULT_SETTINGS).hideAlgorithmicFeeds).toBe(true);
+    expect(fromAny<typeof DEFAULT_SETTINGS, unknown>(env.store.settings).hideAlgorithmicFeeds).toBe(true);
     expect(env.chrome.tabs.sendMessage).toHaveBeenCalledTimes(2);
   });
 
